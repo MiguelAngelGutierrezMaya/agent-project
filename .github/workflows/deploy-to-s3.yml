@@ -38,14 +38,11 @@ jobs:
       - name: Install root dependencies
         run: pnpm install
 
-      - name: move to client/assist-craft-dashboard
-        run: cd client/assist-craft-dashboard
-
       - name: Install client dependencies
-        run: pnpm install
+        run: cd client/assist-craft-dashboard && pnpm install
 
       - name: Build client project
-        run: pnpm build
+        run: cd client/assist-craft-dashboard && pnpm build
 
       - name: Deploy client to S3
         run: pnpm run deploy-to-s3
