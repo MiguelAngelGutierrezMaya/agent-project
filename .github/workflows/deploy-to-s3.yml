@@ -15,6 +15,9 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.AWS_REGION }}
       S3_CLIENT_BUCKET_NAME: ${{ secrets.S3_CLIENT_BUCKET_NAME }}
+      VITE_CLERK_PUBLISHABLE_KEY: ${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
+      VITE_CONFIG_API_BASE_URL: ${{ secrets.VITE_CONFIG_API_BASE_URL }}
+      VITE_STAGE: ${{ secrets.VITE_STAGE }}
 
     steps:
       - name: Checkout code
@@ -39,12 +42,20 @@ jobs:
         run: pnpm install
 
       - name: Install client dependencies
-        run: cd client/assist-craft-dashboard && pnpm install
+        working-directory: client/assist-craft-dashboard
+        run: pnpm install
 
       - name: Build client project
-        run: cd client/assist-craft-dashboard && pnpm build
+        working-directory: client/assist-craft-dashboard
+        run: pnpm build
 
       - name: Deploy client to S3
-        run: cd client/assist-craft-dashboard && pnpm run deploy-to-s3
+        working-directory: client/assist-craft-dashboard
+        run: pnpm run deploy-to-s3
         env:
           NODE_ENV: production
+          S3_CLIENT_BUCKET_NAME: ${{ env.S3_CLIENT_BUCKET_NAME }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+          VITE_CLERK_PUBLISHABLE_KEY: ${{ env.VITE_CLERK_PUBLISHABLE_KEY }}
+          VITE_CONFIG_API_BASE_URL: ${{ env.VITE_CONFIG_API_BASE_URL }}
+          VITE_STAGE: ${{ env.VITE_STAGE }}
