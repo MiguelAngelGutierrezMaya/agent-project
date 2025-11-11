@@ -45,6 +45,6 @@ jobs:
         run: cd client/assist-craft-dashboard && pnpm build
 
       - name: Deploy client to S3
-        run: pnpm run deploy-to-s3
+        run: cd client/assist-craft-dashboard && pnpm run deploy-to-s3
         env:
           NODE_ENV: production
