@@ -15,8 +15,8 @@ const __dirname = path.dirname(__filename);
 const DIST_DIR = path.resolve(__dirname, '../dist');
 
 /* eslint-disable no-undef */
-const BUCKET_NAME = process.env.S3_BUCKET_NAME || '';
-const REGION = process.env.AWS_REGION || '';
+const BUCKET_NAME = (process.env.S3_CLIENT_BUCKET_NAME ?? '').trim();
+const REGION = (process.env.AWS_REGION ?? '').trim();
 
 if (!BUCKET_NAME || !REGION) {
   console.error('Missing required environment variables.');
