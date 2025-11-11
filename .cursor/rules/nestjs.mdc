@@ -1,0 +1,5 @@
+---
+description: Rules for NestJS development
+globs: ['chat/**/*.ts']
+alwaysApply: true
+---

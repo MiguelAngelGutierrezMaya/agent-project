@@ -1,0 +1,38 @@
+export const profile = {
+  title: 'Perfil de Empresa',
+  companyInfo: 'Información de la Empresa',
+  securitySettings: 'Configuración de Seguridad',
+  accountStats: 'Estadísticas de Cuenta',
+  companyName: 'Nombre de la Empresa',
+  administratorName: 'Nombre del Administrador',
+  emailAddress: 'Dirección de Correo',
+  phoneNumber: 'Número de Teléfono',
+  businessAddress: 'Dirección Comercial',
+  contactEmail: 'Correo de Contacto',
+  website: 'Sitio Web',
+  address: 'Dirección',
+  changePassword: 'Cambiar Contraseña',
+  currentPassword: 'Contraseña Actual',
+  newPassword: 'Nueva Contraseña',
+  confirmPassword: 'Confirmar Nueva Contraseña',
+  updatePassword: 'Actualizar Contraseña',
+  saveProfile: 'Guardar Perfil',
+  saving: 'Guardando...',
+  companyLogo: 'Logo de la Empresa',
+  uploadLogo: 'Subir Logo',
+  uploadLogoDescription: 'Sube un logo de la empresa para personalización',
+  profileUpdated: 'Perfil actualizado',
+  profileUpdatedDescription:
+    'El perfil de tu empresa se ha actualizado correctamente.',
+  passwordUpdated: 'Contraseña actualizada',
+  passwordUpdatedDescription: 'Tu contraseña se ha cambiado correctamente.',
+  logoUploaded: 'Logo subido',
+  logoUploadedDescription:
+    'El logo de la empresa se ha actualizado correctamente.',
+  passwordMismatch: 'Las contraseñas no coinciden',
+  passwordMismatchDescription:
+    'La nueva contraseña y la confirmación no coinciden.',
+  passwordTooShort: 'Contraseña muy corta',
+  passwordTooShortDescription:
+    'La contraseña debe tener al menos 8 caracteres.',
+} as const;

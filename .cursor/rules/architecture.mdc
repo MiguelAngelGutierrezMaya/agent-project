@@ -1,0 +1,232 @@
+---
+description: Rules for the architecture of the project
+globs: ['chat/**/*.ts', 'configuration/**/*.ts', 'embedding/**/*.ts']
+alwaysApply: true
+---
+
+# Hexagonal Architecture Rules
+
+## Project Structure Overview
+This project follows **Hexagonal Architecture (Ports & Adapters)** principles with CDK as the infrastructure wrapper. Each service is deployed as AWS Lambda functions with a clean separation of concerns.
+
+## Directory Structure Standards
+
+### Root Level Structure
+```
+{service}/
+├── src/                          # Main source code
+├── lib/                          # CDK infrastructure definitions
+├── bin/                          # CDK entry points
+├── test/                         # Test files
+├── package.json                  # Dependencies
+├── tsconfig.json                 # TypeScript configuration
+├── cdk.json                      # CDK configuration
+└── jest.config.js                # Test configuration
+```
+
+### Source Code Structure (`src/`)
+```
+src/
+├── application/                  # Application layer (Use Cases)
+│   └── use-cases/
+├── domain/                       # Domain layer (Core Business Logic)
+│   └── services/                 # Domain services interfaces
+├── infrastructure/               # Infrastructure layer (Adapters)
+│   ├── presentation/             # HTTP/API adapters
+│   ├── service/                  # Service implementations
+│   └── shared/                   # Shared infrastructure utilities
+└── modules/                      # Feature modules
+    └── {module-name}/
+        ├── application/          # Module-specific use cases
+        ├── domain/               # Module-specific domain logic
+        └── infrastructure/       # Module-specific adapters
+```
+
+## Module Structure Standards
+
+### Each module MUST follow this structure:
+```
+modules/{module-name}/
+├── application/
+│   └── use-cases/
+│       └── {ModuleName}UseCase.ts    # Use case classes
+├── domain/
+│   ├── datasource/                   # Port interfaces (Data access)
+│   ├── dto/                          # Data Transfer Objects
+│   ├── models/                       # Domain entities
+│   └── repositories/                 # Repository interfaces (Ports)
+└── infrastructure/
+    ├── datasource/                   # Data source implementations (Adapters)
+    ├── presentation/                 # HTTP controllers and services
+    └── repositories/                 # Repository implementations (Adapters)
+```
+
+## Layer Responsibilities
+
+### 1. Domain Layer (`domain/`)
+- **Models**: Core business entities with no external dependencies
+- **Repositories**: Interfaces defining data access contracts (Ports)
+- **Datasources**: Interfaces for external data sources (Ports)
+- **Services**: Domain service interfaces (abstract classes)
+
+### 2. Application Layer (`application/`)
+- **Use Cases**: Orchestrate domain objects and infrastructure
+- **Single Responsibility**: Each use case handles one business operation
+- **Dependency Injection**: Use cases depend on repository interfaces, not implementations
+
+### 3. Infrastructure Layer (`infrastructure/`)
+- **Adapters**: Implement domain interfaces (Ports)
+- **Presentation**: HTTP controllers, services, and routers
+- **Persistence**: Database implementations, external API clients
+- **Shared**: Common utilities, error handlers, middleware
+
+## Implementation Standards
+
+### Use Cases
+```typescript
+export class {Operation}UseCase {
+  constructor(private readonly repository: {Module}Repository) {}
+
+  async execute(params: {ParamsType}): Promise<{ReturnType}> {
+    // Business logic orchestration
+    return this.repository.{operation}(params);
+  }
+}
+```
+
+### DTOs (Data Transfer Objects)
+- **Validation**: All DTOs MUST implement `static create()` method for validation
+- **Error Handling**: Return tuple `[DTO?, Error?]` pattern
+- **Inheritance**: Use inheritance for common validation patterns
+- **Immutability**: All properties MUST be `readonly`
+
+### Controllers
+- **Extend Base**: Must extend the base `Controller` class
+- **HTTP Methods**: Override specific HTTP methods (GET, POST, PUT, DELETE)
+- **Error Handling**: Throw `MethodNotImplementedError` for unsupported methods
+- **Service Delegation**: Delegate business logic to services
+
+### Services
+- **Extend Base**: Must extend the base `Service` class
+- **Use Cases**: Use cases MUST be instantiated within service methods
+- **Validation**: Validate input using DTOs before processing
+- **Response Format**: Always return `{ success: boolean, data: any }`
+
+### Repositories
+- **Interface First**: Define interfaces in domain layer
+- **Implementation**: Implement in infrastructure layer
+- **Dependency Injection**: Inject datasources into repository implementations
+
+### Datasources
+- **Interface First**: Define interfaces in domain layer
+- **Implementation**: Implement in infrastructure layer
+- **Transactions**: Use database transactions for multi-table operations
+- **Error Handling**: Proper error handling with domain-specific exceptions
+
+## Error Handling Standards
+
+### Error Hierarchy
+```
+ModuleError (base)
+├── DomainValidationError
+├── DataNotFoundError
+├── ParamRequiredError
+└── DomainNameRequiredError
+```
+
+### Error Usage
+- **Domain Errors**: Use for business logic violations
+- **HTTP Status Codes**: Map domain errors to appropriate HTTP status codes
+- **Error Messages**: Provide clear, actionable error messages
+- **Logging**: Log all errors with context information
+
+## Database Standards
+
+### Connection Management
+- **Singleton Pattern**: Use singleton for database connections
+- **Connection Pooling**: Implement connection pooling for performance
+- **Schema Context**: Dynamic schema switching based on tenant/user context
+- **Transactions**: Use transactions for data consistency
+
+### Query Patterns
+- **Parameterized Queries**: Always use parameterized queries to prevent SQL injection
+- **Dynamic SQL**: Use `DO $$` blocks for complex schema operations
+- **Error Handling**: Wrap database operations in try-catch blocks
+
+## Authentication & Authorization
+
+### Middleware Pattern
+- **Clerk Integration**: Use Clerk for authentication
+- **Middleware Chain**: Implement middleware pattern for request processing
+- **Token Verification**: Verify tokens in handler before routing
+- **Authorization**: Implement authorization at the use case level
+
+## CDK Integration
+
+### Environment Variables
+- **Database Config**: Pass database connection details as environment variables
+- **Service Configuration**: Use environment variables for service-specific configs
+- **Region Management**: Explicitly set AWS region in stack properties
+
+### Lambda Configuration
+- **Node.js Runtime**: Use Node.js 18.x or higher
+- **Memory & Timeout**: Configure appropriate memory and timeout values
+- **Environment**: Pass all necessary environment variables
+
+## Testing Standards
+
+### Test Structure
+- **Colocated Tests**: Place tests in `__test__` folders next to components
+- **Unit Tests**: Test individual components in isolation
+- **Integration Tests**: Test component interactions
+- **Mocking**: Mock external dependencies in tests
+
+## Code Quality Standards
+
+### TypeScript
+- **Strict Mode**: Enable strict TypeScript configuration
+- **Type Safety**: Avoid `any` type, use proper type definitions
+- **Interface Segregation**: Create focused interfaces
+- **Dependency Inversion**: Depend on abstractions, not concretions
+
+### Documentation
+- **JSDoc**: Document all public methods and classes
+- **README**: Maintain README files for each service
+- **Architecture Decisions**: Document architectural decisions
+
+### Performance
+- **Connection Pooling**: Use connection pooling for database connections
+- **Lazy Loading**: Implement lazy loading where appropriate
+- **Caching**: Consider caching for frequently accessed data
+- **Monitoring**: Implement proper logging and monitoring
+
+## Naming Conventions
+
+### Files and Directories
+- **kebab-case**: Use kebab-case for file and directory names
+- **PascalCase**: Use PascalCase for class names
+- **camelCase**: Use camelCase for variables and functions
+- **UPPERCASE**: Use UPPERCASE for constants
+
+### Classes and Interfaces
+- **Use Cases**: `{Operation}UseCase`
+- **Controllers**: `{Module}Controller`
+- **Services**: `{Module}Service`
+- **Repositories**: `{Module}Repository` (interface), `{Module}RepositoryImp` (implementation)
+- **Datasources**: `{Module}Datasource` (interface), `Pg{Module}DatasourceImp` (implementation)
+- **DTOs**: `{Operation}DTO`
+- **Models**: `{Entity}` (domain entity)
+
+## Dependency Management
+
+### Import Rules
+- **Absolute Imports**: Use absolute imports with `@` aliases
+- **Layer Boundaries**: Respect layer boundaries in imports
+- **Circular Dependencies**: Avoid circular dependencies
+- **Type Imports**: Use `import type` for type-only imports
+
+### Dependency Injection
+- **Constructor Injection**: Use constructor injection for dependencies
+- **Interface Segregation**: Inject interfaces, not implementations
+- **Singleton Pattern**: Use singleton pattern for shared resources
+- **Factory Pattern**: Use factory pattern for complex object creation

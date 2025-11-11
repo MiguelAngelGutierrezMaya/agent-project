@@ -1,0 +1,51 @@
+{
+  "name": "mongo-migrations",
+  "version": "1.0.0",
+  "description": "MongoDB migrations for multi-tenant chat application",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "migrate": "ts-node src/index.ts migrate",
+    "migrate:public": "ts-node src/index.ts migrate --public-only",
+    "migrate:tenants": "ts-node src/index.ts migrate --tenants-only",
+    "sync:indexes": "ts-node src/index.ts sync-indexes",
+    "list": "ts-node src/index.ts list",
+    "status": "ts-node src/index.ts status",
+    "clean": "rm -rf dist",
+    "prebuild": "pnpm run clean",
+    "lint": "eslint src/ --ext .ts",
+    "lint:fix": "eslint src/ --ext .ts --fix",
+    "format": "prettier --write src/**/*.ts"
+  },
+  "keywords": [
+    "mongodb",
+    "migrations",
+    "multi-tenant",
+    "chat",
+    "whatsapp"
+  ],
+  "author": "Crealo Digital",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "dotenv": "^16.3.1",
+    "mongodb": "^6.3.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.38.0",
+    "@types/mongodb": "^4.0.7",
+    "@types/node": "^20.10.0",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "globals": "^16.4.0",
+    "prettier": "^3.6.2",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.3.0",
+    "typescript-eslint": "8.46.2-alpha.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
