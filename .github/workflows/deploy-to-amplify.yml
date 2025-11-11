@@ -1,0 +1,37 @@
+name: Deploy to Amplify
+
+on:
+  workflow_run:
+    workflows: ['Deploy to S3']
+    types:
+      - completed
+    branches:
+      - main
+
+jobs:
+  deploy-amplify:
+    name: Deploy to Amplify
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AMPLIFY_APP_ID: ${{ secrets.AMPLIFY_APP_ID }}
+      S3_CLIENT_BUCKET_NAME: ${{ secrets.S3_CLIENT_BUCKET_NAME }}
+
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Trigger Amplify Deploy
+        run: |
+          aws amplify start-deployment \
+            --app-id ${{ env.AMPLIFY_APP_ID }} \
+            --branch-name staging \
+            --source-url s3://${{ env.S3_CLIENT_BUCKET_NAME }} \
+            --source-url-type BUCKET_PREFIX
