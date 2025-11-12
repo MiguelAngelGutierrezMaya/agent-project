@@ -7,7 +7,7 @@ inputs:
     required: true
 
 outputs:
-  filters-json:
+  changes:
     description: JSON object containing the evaluation result for each configured filter.
     value: ${{ steps.filter.outputs.json }}
 
