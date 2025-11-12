@@ -37,7 +37,7 @@ jobs:
       - name: Set outputs
         id: set-outputs
         run: |
-          echo "embedding=${{ (fromJSON(steps.detect.outputs.changes || '{}')).embedding || false }}" >> $GITHUB_OUTPUT
+          echo "embedding=${{ steps.detect.outputs.embedding || 'false' }}" >> $GITHUB_OUTPUT
 
   deploy:
     name: Deploy embedding infrastructure
