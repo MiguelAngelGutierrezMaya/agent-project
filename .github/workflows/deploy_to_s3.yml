@@ -10,7 +10,7 @@ jobs:
     name: Detect client changes
     runs-on: ubuntu-latest
     outputs:
-      client: ${{ steps.set-outputs.outputs.client }}
+      changed_targets: ${{ steps.filter.outputs.changes }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -18,22 +18,18 @@ jobs:
           fetch-depth: 0
 
       - name: Detect path changes
-        id: detect
+        id: filter
         uses: ./.github/actions/detect_path_changes
         with:
           filters: |
             client:
               - 'client/assist-craft-dashboard/**'
               - '.github/workflows/deploy_to_s3.yml'
-      - name: Set outputs
-        id: set-outputs
-        run: |
-          echo "client=${{ steps.detect.outputs.client || 'false' }}" >> $GITHUB_OUTPUT
 
   deploy-s3:
     name: Deploy to S3
     needs: detect-changes
-    if: needs.detect-changes.outputs.client == 'true'
+    if: needs.detect-changes.outputs.changed_targets != '[]' && needs.detect-changes.outputs.changed_targets != ''
     runs-on: ubuntu-latest
 
     env:

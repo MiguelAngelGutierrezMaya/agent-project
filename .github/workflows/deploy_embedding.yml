@@ -19,7 +19,7 @@ jobs:
     name: Detect embedding changes
     runs-on: ubuntu-latest
     outputs:
-      embedding: ${{ steps.set-outputs.outputs.embedding }}
+      changed_targets: ${{ steps.filter.outputs.changes }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,22 +27,18 @@ jobs:
           fetch-depth: 0
 
       - name: Detect path changes
-        id: detect
+        id: filter
         uses: ./.github/actions/detect_path_changes
         with:
           filters: |
             embedding:
               - 'embedding/**'
               - '.github/workflows/deploy_embedding.yml'
-      - name: Set outputs
-        id: set-outputs
-        run: |
-          echo "embedding=${{ steps.detect.outputs.embedding || 'false' }}" >> $GITHUB_OUTPUT
 
   deploy:
     name: Deploy embedding infrastructure
     needs: detect-changes
-    if: github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.embedding == 'true'
+    if: github.event_name == 'workflow_dispatch' || (needs.detect-changes.outputs.changed_targets != '[]' && needs.detect-changes.outputs.changed_targets != '')
     runs-on: ubuntu-latest
     env:
       DEPLOY_ENV: ${{ github.event.inputs.environment || 'development' }}

@@ -19,7 +19,7 @@ jobs:
     name: Detect configuration changes
     runs-on: ubuntu-latest
     outputs:
-      configuration: ${{ steps.set-outputs.outputs.configuration }}
+      changed_targets: ${{ steps.filter.outputs.changes }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -27,22 +27,18 @@ jobs:
           fetch-depth: 0
 
       - name: Detect path changes
-        id: detect
+        id: filter
         uses: ./.github/actions/detect_path_changes
         with:
           filters: |
             configuration:
               - 'configuration/**'
               - '.github/workflows/deploy_configuration.yml'
-      - name: Set outputs
-        id: set-outputs
-        run: |
-          echo "configuration=${{ steps.detect.outputs.configuration || 'false' }}" >> $GITHUB_OUTPUT
 
   deploy:
     name: Deploy configuration infrastructure
     needs: detect-changes
-    if: github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.configuration == 'true'
+    if: github.event_name == 'workflow_dispatch' || (needs.detect-changes.outputs.changed_targets != '[]' && needs.detect-changes.outputs.changed_targets != '')
     runs-on: ubuntu-latest
     env:
       DEPLOY_ENV: ${{ github.event.inputs.environment || 'development' }}
