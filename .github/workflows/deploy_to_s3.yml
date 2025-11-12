@@ -10,7 +10,7 @@ jobs:
     name: Detect client changes
     runs-on: ubuntu-latest
     outputs:
-      changed_targets: ${{ steps.filter.outputs.changes }}
+      changes: ${{ steps.detect.outputs.changes }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0
 
       - name: Detect path changes
-        id: filter
+        id: detect
         uses: ./.github/actions/detect_path_changes
         with:
           filters: |
@@ -29,7 +29,7 @@ jobs:
   deploy-s3:
     name: Deploy to S3
     needs: detect-changes
-    if: needs.detect-changes.outputs.changed_targets != '[]' && needs.detect-changes.outputs.changed_targets != ''
+    if: contains(fromJSON(needs.detect-changes.outputs.changes), 'client')
     runs-on: ubuntu-latest
 
     env:
