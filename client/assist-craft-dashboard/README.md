@@ -114,31 +114,138 @@ src/modules/[module]/presentation/
 
 ### Prerequisites
 
-- **Node.js** (version 18 or higher)
-- **npm** or **pnpm** (recommended)
-- **Git**
+- **Node.js**: v22.14.0 or higher
+- **pnpm**: v10.10.0 or higher (specified in package.json)
+- **Git**: For version control
+- **Clerk Account**: Sign up at https://clerk.com for authentication
+- **Configuration API**: Backend API endpoint deployed and running
 
-### Installation
+### Step-by-Step Installation
+
+#### 1. Navigate to Project Directory
 
 ```bash
-# 1. Clone the repository
-git clone <YOUR_GIT_URL>
-cd assist-craft-dashboard
+cd client/assist-craft-dashboard
+```
 
-# 2. Install dependencies
-npm install
-# or
+#### 2. Install Dependencies
+
+```bash
 pnpm install
+```
 
-# 3. Configure environment variables
-cp .env.example .env.local
-# Edit .env.local with your configurations
+This will install all required dependencies including:
 
-# 4. Start development server
-npm run dev
-# or
+- React 18.3.1
+- TypeScript 5.5.3
+- Vite 5.4.1
+- Shadcn/ui components
+- Clerk authentication
+
+#### 3. Configure Environment Variables
+
+Create a `.env` file in the `client/assist-craft-dashboard/` directory:
+
+```bash
+# Clerk Authentication (Required)
+VITE_CLERK_PUBLISHABLE_KEY=pk_test_xxxxxxxxxxxxxxxxxxxxx
+
+# Configuration API (Required)
+VITE_CONFIG_API_BASE_URL=https://your-config-api.execute-api.us-east-1.amazonaws.com
+
+# Stage/Environment (Required)
+VITE_STAGE=development
+```
+
+**Where to get these values:**
+
+1. **VITE_CLERK_PUBLISHABLE_KEY**:
+   - Go to https://dashboard.clerk.com
+   - Select your application
+   - Navigate to "API Keys"
+   - Copy the "Publishable Key"
+
+2. **VITE_CONFIG_API_BASE_URL**:
+   - This is the URL of your deployed configuration microservice
+   - After deploying the configuration CDK stack, find it in `configuration/outputs.json`
+   - Should look like: `https://xxxxxxxxxx.execute-api.us-east-1.amazonaws.com`
+
+3. **VITE_STAGE**:
+   - Use `development` for local development
+   - Use `production` for production builds
+
+#### 4. Start Development Server
+
+```bash
 pnpm dev
 ```
+
+The application will be available at:
+
+- **URL**: http://localhost:5173
+- **Hot Reload**: Enabled automatically
+- **Network Access**: Available on your local network
+
+#### 5. Verify Installation
+
+Open your browser and navigate to `http://localhost:5173`. You should see:
+
+1. **Login Page**: Clerk authentication screen
+2. **Sign in** with your Clerk credentials
+3. **Dashboard**: Main dashboard with metrics and navigation
+
+**If you see errors:**
+
+- ✅ Verify all environment variables are set correctly
+- ✅ Check that the Configuration API is running and accessible
+- ✅ Ensure your Clerk publishable key is valid
+- ✅ Check browser console for specific error messages
+
+#### 6. Build for Production
+
+```bash
+pnpm build
+```
+
+This creates an optimized production build in the `dist/` directory with:
+
+- Minified JavaScript and CSS
+- Tree-shaken dependencies
+- Optimized assets
+- Source maps (optional)
+
+#### 7. Preview Production Build Locally
+
+```bash
+pnpm preview
+```
+
+This serves the production build locally at `http://localhost:4173` for testing.
+
+#### 8. Deploy to AWS S3 (Optional)
+
+Configure additional environment variables for deployment:
+
+```bash
+# AWS Credentials (for deployment only)
+AWS_ACCESS_KEY_ID=your_aws_access_key_id
+AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key
+AWS_REGION=us-east-1
+S3_CLIENT_BUCKET_NAME=your-s3-bucket-name
+```
+
+Deploy to S3:
+
+```bash
+pnpm run deploy-to-s3
+```
+
+This script:
+
+1. Builds the production bundle
+2. Uploads all files to S3
+3. Sets proper Content-Type headers
+4. Makes files publicly accessible
 
 ### Available Scripts
 
