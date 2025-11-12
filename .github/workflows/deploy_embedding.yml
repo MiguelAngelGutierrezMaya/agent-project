@@ -11,8 +11,8 @@ on:
     branches:
       - main
     paths:
-      - "embedding/**"
-      - ".github/workflows/deploy_embedding.yml"
+      - 'embedding/**'
+      - '.github/workflows/deploy_embedding.yml'
 
 jobs:
   detect-changes:
