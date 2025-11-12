@@ -21,11 +21,15 @@ jobs:
     outputs:
       embedding: ${{ steps.set-outputs.outputs.embedding }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Detect path changes
         id: detect
         uses: ./.github/actions/detect_path_changes
         with:
-          fetch-depth: 0
           filters: |
             embedding:
               - 'embedding/**'

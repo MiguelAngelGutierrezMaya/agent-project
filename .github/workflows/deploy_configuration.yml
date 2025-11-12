@@ -21,11 +21,15 @@ jobs:
     outputs:
       configuration: ${{ steps.set-outputs.outputs.configuration }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Detect path changes
         id: detect
         uses: ./.github/actions/detect_path_changes
         with:
-          fetch-depth: 0
           filters: |
             configuration:
               - 'configuration/**'
