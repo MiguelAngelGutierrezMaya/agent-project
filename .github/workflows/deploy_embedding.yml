@@ -1,0 +1,90 @@
+name: Deploy Embedding CDK
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to deploy (development or production)
+        required: true
+        default: development
+  push:
+    branches:
+      - main
+    paths:
+      - "embedding/**"
+      - ".github/workflows/deploy_embedding.yml"
+
+jobs:
+  detect-changes:
+    name: Detect embedding changes
+    runs-on: ubuntu-latest
+    outputs:
+      embedding: ${{ steps.set-outputs.outputs.embedding }}
+    steps:
+      - name: Detect path changes
+        id: detect
+        uses: ./.github/actions/detect_path_changes
+        with:
+          fetch-depth: 0
+          filters: |
+            embedding:
+              - 'embedding/**'
+              - '.github/workflows/deploy_embedding.yml'
+      - name: Set outputs
+        id: set-outputs
+        run: |
+          echo "embedding=${{ fromJSON(steps.detect.outputs.filters-json).embedding }}" >> $GITHUB_OUTPUT
+
+  deploy:
+    name: Deploy embedding infrastructure
+    needs: detect-changes
+    if: github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.embedding == 'true'
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_ENV: ${{ github.event.inputs.environment || 'development' }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      CLERK_SECRET_KEY: ${{ secrets.EMBEDDING_CLERK_SECRET_KEY }}
+      CLERK_PUBLISHABLE_KEY: ${{ secrets.EMBEDDING_CLERK_PUBLISHABLE_KEY }}
+      CLERK_JWT_KEY: ${{ secrets.EMBEDDING_CLERK_JWT_KEY }}
+      CLERK_AUTHORIZED_PARTIES: ${{ secrets.EMBEDDING_CLERK_AUTHORIZED_PARTIES }}
+      ALLOWED_METHODS: ${{ secrets.EMBEDDING_ALLOWED_METHODS }}
+      EVENT_BRIDGE_AUTHORIZED_PARTIES: ${{ secrets.EMBEDDING_EVENT_BRIDGE_AUTHORIZED_PARTIES }}
+      EVENT_BRIDGE_PASSWORD: ${{ secrets.EMBEDDING_EVENT_BRIDGE_PASSWORD }}
+      DOMAIN_NAME: ${{ secrets.EMBEDDING_DOMAIN_NAME }}
+      OPENAI_API_KEY: ${{ secrets.EMBEDDING_OPENAI_API_KEY }}
+      DATABASE_HOST: ${{ secrets.EMBEDDING_DATABASE_HOST }}
+      DATABASE_PORT: ${{ secrets.EMBEDDING_DATABASE_PORT }}
+      DATABASE_NAME: ${{ secrets.EMBEDDING_DATABASE_NAME }}
+      DATABASE_USER: ${{ secrets.EMBEDDING_DATABASE_USER }}
+      DATABASE_PASSWORD: ${{ secrets.EMBEDDING_DATABASE_PASSWORD }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure Node and pnpm
+        uses: ./.github/actions/configure_pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: embedding
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy CDK stacks
+        working-directory: embedding
+        env:
+          NODE_ENV: ${{ env.DEPLOY_ENV }}
+        run: |
+          if [[ "$NODE_ENV" == "production" ]]; then
+            pnpm run cdk:deploy:prod
+          else
+            pnpm run cdk:deploy:dev
+          fi

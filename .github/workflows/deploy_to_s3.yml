@@ -6,8 +6,30 @@ on:
       - main
 
 jobs:
+  detect-changes:
+    name: Detect client changes
+    runs-on: ubuntu-latest
+    outputs:
+      client: ${{ steps.set-outputs.outputs.client }}
+    steps:
+      - name: Detect path changes
+        id: detect
+        uses: ./.github/actions/detect_path_changes
+        with:
+          fetch-depth: 0
+          filters: |
+            client:
+              - 'client/assist-craft-dashboard/**'
+              - '.github/workflows/deploy_to_s3.yml'
+      - name: Set outputs
+        id: set-outputs
+        run: |
+          echo "client=${{ fromJSON(steps.detect.outputs.filters-json).client }}" >> $GITHUB_OUTPUT
+
   deploy-s3:
     name: Deploy to S3
+    needs: detect-changes
+    if: needs.detect-changes.outputs.client == 'true'
     runs-on: ubuntu-latest
 
     env:
@@ -23,10 +45,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22.14.0
+      - name: Configure Node and pnpm
+        uses: ./.github/actions/configure_pnpm
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -34,9 +54,6 @@ jobs:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-
-      - name: Install pnpm
-        run: npm install -g pnpm@10.10.0
 
       - name: Install root dependencies
         run: pnpm install

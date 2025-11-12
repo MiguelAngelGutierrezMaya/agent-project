@@ -1,0 +1,86 @@
+name: Deploy Configuration CDK
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to deploy (development or production)
+        required: true
+        default: development
+  push:
+    branches:
+      - main
+    paths:
+      - 'configuration/**'
+      - '.github/workflows/deploy_configuration.yml'
+
+jobs:
+  detect-changes:
+    name: Detect configuration changes
+    runs-on: ubuntu-latest
+    outputs:
+      configuration: ${{ steps.set-outputs.outputs.configuration }}
+    steps:
+      - name: Detect path changes
+        id: detect
+        uses: ./.github/actions/detect_path_changes
+        with:
+          fetch-depth: 0
+          filters: |
+            configuration:
+              - 'configuration/**'
+              - '.github/workflows/deploy_configuration.yml'
+      - name: Set outputs
+        id: set-outputs
+        run: |
+          echo "configuration=${{ fromJSON(steps.detect.outputs.filters-json).configuration }}" >> $GITHUB_OUTPUT
+
+  deploy:
+    name: Deploy configuration infrastructure
+    needs: detect-changes
+    if: github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.configuration == 'true'
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_ENV: ${{ github.event.inputs.environment || 'development' }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      CLERK_SECRET_KEY: ${{ secrets.CONFIGURATION_CLERK_SECRET_KEY }}
+      CLERK_PUBLISHABLE_KEY: ${{ secrets.CONFIGURATION_CLERK_PUBLISHABLE_KEY }}
+      CLERK_JWT_KEY: ${{ secrets.CONFIGURATION_CLERK_JWT_KEY }}
+      CLERK_AUTHORIZED_PARTIES: ${{ secrets.CONFIGURATION_CLERK_AUTHORIZED_PARTIES }}
+      ALLOWED_METHODS: ${{ secrets.CONFIGURATION_ALLOWED_METHODS }}
+      DATABASE_HOST: ${{ secrets.CONFIGURATION_DATABASE_HOST }}
+      DATABASE_PORT: ${{ secrets.CONFIGURATION_DATABASE_PORT }}
+      DATABASE_NAME: ${{ secrets.CONFIGURATION_DATABASE_NAME }}
+      DATABASE_USER: ${{ secrets.CONFIGURATION_DATABASE_USER }}
+      DATABASE_PASSWORD: ${{ secrets.CONFIGURATION_DATABASE_PASSWORD }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure Node and pnpm
+        uses: ./.github/actions/configure_pnpm
+
+      - name: Install dependencies
+        working-directory: configuration
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy CDK stacks
+        working-directory: configuration
+        env:
+          NODE_ENV: ${{ env.DEPLOY_ENV }}
+        run: |
+          if [[ "$NODE_ENV" == "production" ]]; then
+            pnpm run cdk:deploy:prod --exclude FilesBucketStack
+          else
+            pnpm run cdk:deploy:dev --exclude FilesBucketStack
+          fi

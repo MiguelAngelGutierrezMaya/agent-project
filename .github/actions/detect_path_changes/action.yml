@@ -1,0 +1,30 @@
+name: Detect Path Changes
+description: Determine whether predefined path filters were modified in the current workflow run.
+
+inputs:
+  filters:
+    description: YAML definition of the path filters to evaluate.
+    required: true
+  fetch-depth:
+    description: Git fetch depth used when checking out the repository.
+    required: false
+    default: '0'
+
+outputs:
+  filters-json:
+    description: JSON object containing the evaluation result for each configured filter.
+    value: ${{ steps.filter.outputs.json }}
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: ${{ inputs.fetch-depth }}
+
+    - name: Evaluate path filters
+      id: filter
+      uses: dorny/paths-filter@v3
+      with:
+        filters: ${{ inputs.filters }}
