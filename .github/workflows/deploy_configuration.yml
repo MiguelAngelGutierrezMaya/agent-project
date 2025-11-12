@@ -37,7 +37,7 @@ jobs:
       - name: Set outputs
         id: set-outputs
         run: |
-          echo "configuration=${{ fromJSON(steps.detect.outputs.filters-json).configuration }}" >> $GITHUB_OUTPUT
+          echo "configuration=${{ steps.detect.outputs.configuration || 'false' }}" >> $GITHUB_OUTPUT
 
   deploy:
     name: Deploy configuration infrastructure

@@ -28,7 +28,7 @@ jobs:
       - name: Set outputs
         id: set-outputs
         run: |
-          echo "client=${{ fromJSON(steps.detect.outputs.filters-json).client }}" >> $GITHUB_OUTPUT
+          echo "client=${{ steps.detect.outputs.client || 'false' }}" >> $GITHUB_OUTPUT
 
   deploy-s3:
     name: Deploy to S3
