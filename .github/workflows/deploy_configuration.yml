@@ -40,10 +40,11 @@ jobs:
     needs: detect-changes
     if: github.event_name == 'workflow_dispatch' || contains(fromJSON(needs.detect-changes.outputs.changes), 'configuration')
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     env:
       DEPLOY_ENV: ${{ github.event.inputs.environment || 'development' }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: ${{ secrets.AWS_REGION }}
       CLERK_SECRET_KEY: ${{ secrets.CONFIGURATION_CLERK_SECRET_KEY }}
       CLERK_PUBLISHABLE_KEY: ${{ secrets.CONFIGURATION_CLERK_PUBLISHABLE_KEY }}
