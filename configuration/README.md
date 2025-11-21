@@ -7,6 +7,7 @@ The **Configuration Microservice** is a serverless API built with **AWS CDK** th
 ## 🎯 Purpose
 
 This microservice serves as the central configuration hub for the entire platform, managing:
+
 - **Company Configuration**: AI settings, billing information, menu options, and social media links
 - **Documents**: Training materials and knowledge base content for the AI assistant
 - **Products**: Product catalog with descriptions, specifications, and pricing
@@ -75,26 +76,31 @@ lib/
 ## 🛠️ Technology Stack
 
 ### Backend Core
+
 - **Node.js 18.x** - Runtime environment
 - **TypeScript 5.9.2** - Static typing
 - **AWS Lambda** - Serverless compute
 - **AWS API Gateway** - HTTP endpoints
 
 ### Infrastructure
+
 - **AWS CDK 2.214.0** - Infrastructure as Code
 - **AWS SDK v3** - AWS service interactions
 
 ### Data & Storage
+
 - **PostgreSQL** - Primary database
 - **pg 8.11.3** - PostgreSQL client
 - **AWS S3** - File storage
 - **AWS SQS** - Configuration notification queue
 
 ### Authentication & Security
+
 - **Clerk 2.14.0** - Authentication provider
 - **Custom middleware** - Authorization and tenant isolation
 
 ### Utilities
+
 - **Winston 3.17.0** - Structured logging
 - **dotenv 17.2.2** - Environment configuration
 - **uuid 13.0.0** - Unique identifier generation
@@ -102,6 +108,7 @@ lib/
 ## 📊 Key Features
 
 ### 1. Configuration Management
+
 - **AI Configuration**: Model settings, temperature, max tokens, system prompts
 - **Billing Information**: Subscription plans and payment details
 - **Menu Options**: Bot menu structure and options
@@ -109,12 +116,14 @@ lib/
 - **Change Notifications**: SQS-based event publishing for configuration updates
 
 ### 2. Document Management
+
 - **CRUD Operations**: Create, read, update, delete training documents
 - **Document Types**: URL-based and PDF documents
 - **Pagination**: Efficient listing with offset/limit pagination
 - **Multi-tenant**: Schema-based tenant isolation
 
 ### 3. Product Catalog
+
 - **Product Management**: Full CRUD for products with specifications
 - **Product Categories**: Hierarchical category structure
 - **Product Details**: Name, description, price, stock, specifications (JSONB)
@@ -122,12 +131,14 @@ lib/
 - **Pagination**: Cursor-based and offset pagination support
 
 ### 4. File Storage
+
 - **S3 Integration**: Upload files to S3 with automatic key generation
 - **Presigned URLs**: Secure, temporary URLs for file access
 - **Base64 Upload**: Direct base64-to-S3 conversion
 - **Content Type Detection**: Automatic MIME type handling
 
 ### 5. Multi-tenancy
+
 - **Schema Isolation**: Each tenant has a dedicated PostgreSQL schema
 - **Secure Access**: Clerk authentication with tenant-specific authorization
 - **Request Scoping**: All requests are scoped to the authenticated user's tenant
@@ -190,6 +201,7 @@ pnpm run cdk:deploy:dev
 ```
 
 This command will:
+
 1. Set `NODE_ENV=development`
 2. Bootstrap the CDK environment
 3. Synthesize CloudFormation templates
@@ -218,6 +230,7 @@ pnpm run cdk:deploy:prod -- --exclude FilesBucketStack
 ## 📜 Available Scripts
 
 ### Development
+
 ```bash
 pnpm dev                    # Run in development mode with tsx
 pnpm build                  # Compile TypeScript and resolve aliases
@@ -226,11 +239,13 @@ pnpm clean                  # Remove dist/ directory
 ```
 
 ### Testing
+
 ```bash
 pnpm test                   # Run Jest tests
 ```
 
 ### CDK Operations
+
 ```bash
 pnpm run cdk                # Run CDK CLI directly
 pnpm run cdk:bootstrap      # Bootstrap CDK environment
@@ -277,6 +292,7 @@ The `scripts/deploy-stacks.sh` script provides advanced deployment options:
 ```
 
 **Environment Variables for Scripts:**
+
 ```bash
 # Alternative to CLI args
 EXCLUDE=FilesBucketStack pnpm run cdk:deploy:dev
@@ -289,9 +305,11 @@ OUTPUT_FILE=custom.json pnpm run cdk:deploy:dev
 ### Core Modules
 
 #### 1. Config Module
+
 Manages company configuration including AI settings, billing, menu options, and social media.
 
 **Domain Models:**
+
 - `Config`: Master configuration object
 - `AiConfig`: AI model settings and prompts
 - `Billing`: Subscription and payment information
@@ -299,69 +317,87 @@ Manages company configuration including AI settings, billing, menu options, and 
 - `SocialConfig`: Social media profiles
 
 **Key Use Cases:**
+
 - `ConfigUseCase`: Get and update configuration
 - `SendConfigNotificationUseCase`: Publish configuration change events to SQS
 
 **Repositories:**
+
 - `ConfigRepository`: Configuration CRUD operations
 - `NotificationRepository`: SQS notification publishing
 
 #### 2. Documents Module
+
 Manages training documents and knowledge base content.
 
 **Domain Models:**
+
 - `Document`: Training document metadata
 - `DocumentEmbedding`: Vector embeddings for documents
 
 **Key Use Cases:**
+
 - `DocumentUseCase`: CRUD operations for documents
 
 **Repositories:**
+
 - `DocumentRepository`: Document CRUD operations
 
 #### 3. Products Module
+
 Manages product catalog with categories and specifications.
 
 **Domain Models:**
+
 - `Product`: Product entity with name, description, price, stock
 - `ProductCategory`: Hierarchical product categories
 - `ProductEmbedding`: Vector embeddings for products
 
 **Key Use Cases:**
+
 - `ProductUseCase`: CRUD operations for products
 - `ProductCategoryUseCase`: CRUD operations for categories
 
 **Repositories:**
+
 - `ProductRepository`: Product CRUD operations
 - `ProductCategoryRepository`: Category CRUD operations
 
 #### 4. Files Module
+
 Manages file uploads to S3 and presigned URL generation.
 
 **Domain Models:**
+
 - `File`: File metadata with S3 key and URL
 
 **Key Use Cases:**
+
 - `CreateFileUseCase`: Upload files to S3
 - `GetFileUseCase`: Generate presigned URLs
 
 **Repositories:**
+
 - `FileRepository`: File operations
 
 **Datasources:**
+
 - `S3FileDatasourceImp`: S3 SDK integration
 
 ### Shared Infrastructure
 
 #### Authentication Middleware
+
 - **ClerkAuthMiddlewareImp**: Validates JWT tokens, extracts user ID, enforces tenant isolation
 
 #### Error Handling
+
 - **Domain Errors**: Business logic validation errors
 - **Service Errors**: Infrastructure-level errors
 - **HTTP Status Mapping**: Automatic error-to-status-code conversion
 
 #### CORS Configuration
+
 - **Dynamic origins**: Configurable allowed origins
 - **Preflight support**: OPTIONS request handling
 
@@ -370,27 +406,39 @@ Manages file uploads to S3 and presigned URL generation.
 ### Configuration Endpoints
 
 #### GET /config
+
 Get the current configuration for the authenticated user's tenant.
 
 **Response:**
+
 ```json
 {
   "success": true,
   "data": {
     "id": "uuid",
     "schema": "tenant_schema",
-    "aiConfig": { /* AI settings */ },
-    "billing": { /* Billing info */ },
-    "menuOptions": [ /* Menu options */ ],
-    "socialMedia": { /* Social profiles */ }
+    "aiConfig": {
+      /* AI settings */
+    },
+    "billing": {
+      /* Billing info */
+    },
+    "menuOptions": [
+      /* Menu options */
+    ],
+    "socialMedia": {
+      /* Social profiles */
+    }
   }
 }
 ```
 
 #### PUT /config
+
 Update configuration for the authenticated user's tenant.
 
 **Request Body:**
+
 ```json
 {
   "aiConfig": {
@@ -408,9 +456,11 @@ Update configuration for the authenticated user's tenant.
 ### Document Endpoints
 
 #### POST /documents
+
 Create a new document.
 
 **Request Body:**
+
 ```json
 {
   "name": "Product Guide",
@@ -421,13 +471,16 @@ Create a new document.
 ```
 
 #### GET /documents
+
 List documents with pagination.
 
 **Query Parameters:**
+
 - `offset` (number): Pagination offset
 - `limit` (number): Number of results per page
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -450,17 +503,21 @@ List documents with pagination.
 ```
 
 #### PUT /documents/:id
+
 Update an existing document.
 
 #### DELETE /documents/:id
+
 Delete a document.
 
 ### Product Endpoints
 
 #### POST /products
+
 Create a new product.
 
 **Request Body:**
+
 ```json
 {
   "name": "Product Name",
@@ -478,23 +535,29 @@ Create a new product.
 ```
 
 #### GET /products
+
 List products with pagination.
 
 **Query Parameters:**
+
 - `offset` (number): Pagination offset
 - `limit` (number): Number of results per page
 - `categoryId` (string, optional): Filter by category
 
 #### PUT /products/:id
+
 Update an existing product.
 
 #### DELETE /products/:id
+
 Delete a product.
 
 #### GET /products/categories
+
 List all product categories.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -512,9 +575,11 @@ List all product categories.
 ### File Endpoints
 
 #### POST /files
+
 Upload a file to S3.
 
 **Request Body:**
+
 ```json
 {
   "base64": "base64-encoded-file-content",
@@ -525,6 +590,7 @@ Upload a file to S3.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -536,9 +602,11 @@ Upload a file to S3.
 ```
 
 #### POST /files/presigned-url
+
 Get a presigned URL for file access.
 
 **Request Body:**
+
 ```json
 {
   "key": "tenant_schema/documents/uuid-document.pdf"
@@ -546,6 +614,7 @@ Get a presigned URL for file access.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -558,19 +627,23 @@ Get a presigned URL for file access.
 ## 🔐 Security
 
 ### Authentication
+
 - **Clerk JWT validation**: All requests must include valid Clerk session tokens
 - **Authorized parties validation**: Requests must originate from approved domains
 
 ### Authorization
+
 - **Tenant isolation**: Each request is scoped to the authenticated user's tenant schema
 - **Schema-based separation**: Database schemas isolate tenant data
 - **User ID extraction**: Clerk userId is extracted and used for tenant mapping
 
 ### SQS Security
+
 - **Queue access policies**: Restricted to authorized AWS principals
 - **Message encryption**: Server-side encryption for messages at rest
 
 ### S3 Security
+
 - **Bucket policies**: Restricted public access
 - **Presigned URL expiration**: Time-limited access to files
 - **IAM role permissions**: Lambda functions have minimal required permissions
@@ -580,6 +653,7 @@ Get a presigned URL for file access.
 ### Tables
 
 #### config
+
 - `id` (UUID, PK)
 - `schema` (VARCHAR) - Tenant identifier
 - `ai_config` (JSONB) - AI model settings
@@ -590,6 +664,7 @@ Get a presigned URL for file access.
 - `updated_at` (TIMESTAMP)
 
 #### documents
+
 - `id` (UUID, PK)
 - `schema` (VARCHAR) - Tenant identifier
 - `name` (VARCHAR)
@@ -600,6 +675,7 @@ Get a presigned URL for file access.
 - `updated_at` (TIMESTAMP)
 
 #### document_embeddings
+
 - `id` (UUID, PK)
 - `document_id` (UUID, FK)
 - `embedding` (VECTOR) - pgvector type
@@ -607,6 +683,7 @@ Get a presigned URL for file access.
 - `created_at` (TIMESTAMP)
 
 #### products
+
 - `id` (UUID, PK)
 - `schema` (VARCHAR) - Tenant identifier
 - `name` (VARCHAR)
@@ -622,6 +699,7 @@ Get a presigned URL for file access.
 - `updated_at` (TIMESTAMP)
 
 #### product_categories
+
 - `id` (UUID, PK)
 - `schema` (VARCHAR) - Tenant identifier
 - `name` (VARCHAR)
@@ -631,6 +709,7 @@ Get a presigned URL for file access.
 - `updated_at` (TIMESTAMP)
 
 #### product_embeddings
+
 - `id` (UUID, PK)
 - `product_id` (UUID, FK)
 - `embedding` (VECTOR) - pgvector type
@@ -640,11 +719,13 @@ Get a presigned URL for file access.
 ## 🧪 Testing
 
 ### Run Tests
+
 ```bash
 pnpm test
 ```
 
 ### Test Structure
+
 ```
 test/
 ├── unit/                 # Unit tests for business logic
@@ -657,43 +738,53 @@ test/
 ### Common Issues
 
 #### 1. CDK Bootstrap Fails
+
 **Problem**: `CDKToolkit stack not found`
 
-**Solution**: 
+**Solution**:
+
 ```bash
 aws configure  # Verify AWS credentials
 pnpm run cdk:bootstrap
 ```
 
 #### 2. Stack Already Exists
+
 **Problem**: FilesBucketStack already exists and deployment fails
 
-**Solution**: 
+**Solution**:
+
 ```bash
 # Exclude the existing stack from deployment
 pnpm run cdk:deploy:dev -- --exclude FilesBucketStack
 ```
 
 #### 3. Database Connection Issues
+
 **Problem**: Cannot connect to PostgreSQL
 
-**Solution**: 
+**Solution**:
+
 - Verify `DATABASE_*` environment variables
 - Check security group rules for Lambda
 - Ensure database accepts connections from Lambda VPC
 
 #### 4. S3 Upload Fails
+
 **Problem**: File upload returns 403 Forbidden
 
 **Solution**:
+
 - Verify Lambda execution role has S3 permissions
 - Check bucket policy allows Lambda to PutObject
 - Verify bucket name is correct in environment variables
 
 #### 5. SQS Message Not Sent
+
 **Problem**: Configuration update doesn't trigger notification
 
 **Solution**:
+
 - Verify SQS queue URL is correct
 - Check Lambda execution role has SQS SendMessage permission
 - Review CloudWatch logs for error messages
@@ -701,10 +792,12 @@ pnpm run cdk:deploy:dev -- --exclude FilesBucketStack
 ## 📈 Monitoring
 
 ### CloudWatch Logs
+
 - Lambda execution logs: `/aws/lambda/configuration-function-{env}`
 - API Gateway logs: `/aws/apigateway/configuration-api-{env}`
 
 ### Metrics to Monitor
+
 - **Lambda duration**: Should be < 10 seconds for most operations
 - **API Gateway 4xx/5xx**: Should be < 1%
 - **Database connection pool**: Monitor for connection exhaustion
@@ -712,6 +805,7 @@ pnpm run cdk:deploy:dev -- --exclude FilesBucketStack
 - **SQS message delivery**: Should be 100%
 
 ### Alarms (Recommended)
+
 - Lambda errors > 10 in 5 minutes
 - API Gateway 5xx errors > 5% in 5 minutes
 - Database connection failures
@@ -726,10 +820,12 @@ The microservice is automatically deployed via GitHub Actions when changes are p
 **Workflow:** `.github/workflows/deploy_configuration.yml`
 
 **Triggers:**
+
 - Push to `main` branch affecting `configuration/**`
 - Manual workflow dispatch
 
 **Steps:**
+
 1. Detect changes in configuration directory
 2. Checkout repository
 3. Configure Node.js and pnpm
@@ -741,18 +837,23 @@ The microservice is automatically deployed via GitHub Actions when changes are p
 ## 📚 AWS Resources Created
 
 ### Lambda Functions
+
 - **ConfigurationLambda**: Handles all API requests for configuration, documents, products, and files
 
 ### API Gateway
+
 - **ConfigurationAPI**: REST API with CORS support and Clerk authorization
 
 ### S3 Buckets
+
 - **FilesBucket**: Stores uploaded files (documents, product images)
 
 ### SQS Queues
+
 - **ConfigNotificationsQueue**: Receives configuration change notifications
 
 ### IAM Roles
+
 - **ConfigurationLambdaExecutionRole**: Lambda execution role with permissions for:
   - CloudWatch Logs
   - PostgreSQL access (via VPC)
@@ -774,4 +875,3 @@ ISC License - See LICENSE file for details
 ---
 
 **For questions or support, contact the development team.**
-

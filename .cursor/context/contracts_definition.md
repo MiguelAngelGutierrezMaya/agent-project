@@ -169,7 +169,7 @@ The system uses a **multi-tenant architecture** with schema-based isolation:
 ```json
 {
   "id": "uuid",
-  "amount": 100.50,
+  "amount": 100.5,
   "currency": "USD",
   "status": "pending | paid | failed | refunded | cancelled",
   "created_at": "2021-01-01T00:00:00Z",
@@ -243,7 +243,7 @@ The system uses a **multi-tenant architecture** with schema-based isolation:
   "id": "uuid",
   "chat_model": "azure-openai-gpt-4o-mini",
   "embedding_model": "text-embedding-3-small",
-  "temperature": 0.30,
+  "temperature": 0.3,
   "max_tokens": 500,
   "batch_embedding": true,
   "created_at": "2021-01-01T00:00:00Z",
@@ -378,7 +378,7 @@ The system uses a **multi-tenant architecture** with schema-based isolation:
   "aiConfig": {
     "chatModel": "azure-openai-gpt-4o-mini",
     "embeddingModel": "text-embedding-3-small",
-    "temperature": 0.30,
+    "temperature": 0.3,
     "maxTokens": 500,
     "batchEmbedding": true
   },
@@ -450,7 +450,7 @@ The system uses a **multi-tenant architecture** with schema-based isolation:
     "isAiGenerated": true,
     "model": "azure-openai-gpt-4o-mini",
     "tokensUsed": 150,
-    "temperature": 0.30,
+    "temperature": 0.3,
     "generationTime": 1200
   },
   "error": {
@@ -532,12 +532,14 @@ The system uses a **multi-tenant architecture** with schema-based isolation:
 ### Status Enums Reference
 
 #### Conversation Status
+
 - `with_bot`: AI is actively handling the conversation
 - `with_human`: Conversation transferred to human agent
 - `closed`: Conversation has been closed/resolved
 - `inactive`: Conversation inactive (no messages for extended period)
 
 #### Message Status (Outbound only)
+
 - `sending`: Message being sent to WhatsApp API
 - `sent`: WhatsApp confirmed receipt
 - `delivered`: Message delivered to user's device
@@ -545,12 +547,14 @@ The system uses a **multi-tenant architecture** with schema-based isolation:
 - `failed`: Message failed to send
 
 #### Embedding Status
+
 - `pending`: Awaiting embedding generation
 - `processing`: Currently being embedded
 - `completed`: Embedding successfully generated
 - `failed`: Embedding generation failed
 
 #### WhatsApp Window Status
+
 - `open`: Within 24-hour window, free-form messages allowed
 - `closed`: Outside 24-hour window, only template messages allowed
 

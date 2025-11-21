@@ -7,6 +7,7 @@ The **Agent Project** is a comprehensive AI-powered assistant platform designed 
 ## 🏗️ Architecture
 
 The project follows a **microservices architecture** with **Hexagonal Architecture (Ports & Adapters)** principles across all services, ensuring:
+
 - **Clean separation of concerns**
 - **High testability and maintainability**
 - **Technology-agnostic core business logic**
@@ -85,12 +86,14 @@ The project follows a **microservices architecture** with **Hexagonal Architectu
 ## 🚀 Services Overview
 
 ### 1. Configuration Service
+
 **Location:** `configuration/`  
 **Documentation:** [configuration/README.md](configuration/README.md)
 
 **Purpose:** Central configuration hub managing company profiles, products, documents, and file storage.
 
 **Key Features:**
+
 - ✅ Company configuration (AI settings, billing, menu options, social media)
 - ✅ Product catalog with categories and specifications
 - ✅ Document management for AI training
@@ -99,6 +102,7 @@ The project follows a **microservices architecture** with **Hexagonal Architectu
 - ✅ Multi-tenant architecture with schema isolation
 
 **Technology Stack:**
+
 - Node.js + TypeScript
 - AWS Lambda + API Gateway
 - AWS CDK for infrastructure
@@ -111,12 +115,14 @@ The project follows a **microservices architecture** with **Hexagonal Architectu
 ---
 
 ### 2. Embedding Service
+
 **Location:** `embedding/`  
 **Documentation:** [embedding/README.md](embedding/README.md)
 
 **Purpose:** Generates and manages vector embeddings for semantic search capabilities.
 
 **Key Features:**
+
 - ✅ Automatic vector embedding generation for documents and products
 - ✅ OpenAI text-embedding-3-small integration
 - ✅ Batch and direct processing modes
@@ -125,6 +131,7 @@ The project follows a **microservices architecture** with **Hexagonal Architectu
 - ✅ pgvector-powered semantic search
 
 **Technology Stack:**
+
 - Node.js + TypeScript
 - AWS Lambda + EventBridge
 - AWS CDK for infrastructure
@@ -137,12 +144,14 @@ The project follows a **microservices architecture** with **Hexagonal Architectu
 ---
 
 ### 3. Chat Service
+
 **Location:** `chat/`  
 **Documentation:** [chat/README.md](chat/README.md)
 
 **Purpose:** WhatsApp-based AI assistant with conversational capabilities and intelligent tool usage.
 
 **Key Features:**
+
 - ✅ WhatsApp Business API integration
 - ✅ Azure OpenAI GPT-4o Mini for conversations
 - ✅ Multi-tool support (product search, company info, featured products, transfer to human)
@@ -152,6 +161,7 @@ The project follows a **microservices architecture** with **Hexagonal Architectu
 - ✅ Multi-tenant support
 
 **Technology Stack:**
+
 - Node.js + TypeScript + NestJS
 - Azure OpenAI GPT-4o Mini
 - LangChain for AI orchestration
@@ -165,12 +175,14 @@ The project follows a **microservices architecture** with **Hexagonal Architectu
 ---
 
 ### 4. Client Dashboard
+
 **Location:** `client/assist-craft-dashboard/`  
 **Documentation:** [client/assist-craft-dashboard/README.md](client/assist-craft-dashboard/README.md)
 
 **Purpose:** Web-based dashboard for managing and configuring AI assistants.
 
 **Key Features:**
+
 - ✅ Training data management (documents and products)
 - ✅ Product catalog with categories
 - ✅ Bot configuration (AI settings, menu options, messages)
@@ -180,6 +192,7 @@ The project follows a **microservices architecture** with **Hexagonal Architectu
 - ✅ Modular architecture (76% code reduction)
 
 **Technology Stack:**
+
 - React 18.3 + TypeScript 5.5
 - Vite 5.4
 - Tailwind CSS + Shadcn/ui
@@ -192,21 +205,26 @@ The project follows a **microservices architecture** with **Hexagonal Architectu
 ---
 
 ### 5. Database Infrastructure
+
 **Location:** `database/`
 
 #### PostgreSQL (`database/postgresql/`)
+
 **Purpose:** Primary database for structured data with vector search capabilities.
 
 **Features:**
+
 - ✅ Multi-tenant schema separation
 - ✅ pgvector extension for embeddings
 - ✅ TypeScript-based migrations
 - ✅ Products, documents, and configuration tables
 
 #### MongoDB (`database/mongo/`)
+
 **Purpose:** NoSQL database for conversations and real-time data.
 
 **Features:**
+
 - ✅ Conversation history storage
 - ✅ Message tracking
 - ✅ Client configuration caching
@@ -242,6 +260,7 @@ agent-project/
 ## 🛠️ Technology Stack Summary
 
 ### Frontend
+
 - **React 18.3** - UI library
 - **TypeScript 5.5** - Static typing
 - **Vite 5.4** - Build tool
@@ -250,6 +269,7 @@ agent-project/
 - **TanStack React Query** - Server state management
 
 ### Backend
+
 - **Node.js 18.x** - Runtime
 - **TypeScript 5.9** - Static typing
 - **NestJS 10.x** - Backend framework (chat service)
@@ -257,16 +277,19 @@ agent-project/
 - **AWS CDK 2.214** - Infrastructure as Code
 
 ### AI & ML
+
 - **Azure OpenAI GPT-4o Mini** - Conversational AI
 - **OpenAI text-embedding-3-small** - Vector embeddings
 - **LangChain** - AI orchestration
 - **pgvector** - Vector similarity search
 
 ### Databases
+
 - **PostgreSQL** - Relational database with pgvector
 - **MongoDB** - NoSQL database for conversations
 
 ### Cloud & Infrastructure
+
 - **AWS Lambda** - Serverless compute
 - **AWS API Gateway** - HTTP endpoints
 - **AWS S3** - File storage
@@ -276,9 +299,11 @@ agent-project/
 - **AWS CDK** - Infrastructure provisioning
 
 ### Authentication
+
 - **Clerk** - User authentication and management
 
 ### DevOps
+
 - **GitHub Actions** - CI/CD automation
 - **pnpm 10.15.1** - Package manager
 - **Prettier** - Code formatting
@@ -359,6 +384,7 @@ Each service requires its own `.env` file. Refer to the individual service docum
 #### 4. Deploy Infrastructure
 
 **Configuration Service:**
+
 ```bash
 cd configuration
 pnpm run cdk:deploy:dev
@@ -366,6 +392,7 @@ cd ..
 ```
 
 **Embedding Service:**
+
 ```bash
 cd embedding
 pnpm run cdk:deploy:dev
@@ -373,6 +400,7 @@ cd ..
 ```
 
 **Chat Service:**
+
 ```bash
 cd chat
 # Deploy to AWS Lightsail (manual setup required)
@@ -380,6 +408,7 @@ cd chat
 ```
 
 **Client Dashboard:**
+
 ```bash
 cd client/assist-craft-dashboard
 pnpm run build
@@ -408,68 +437,84 @@ pnpm test                # Run tests across all services
 The project uses GitHub Actions for automated deployment:
 
 #### 1. Configuration Deployment
+
 **Workflow:** `.github/workflows/deploy_configuration.yml`
 
 **Triggers:**
+
 - Push to `main` affecting `configuration/**`
 - Manual workflow dispatch
 
 **Actions:**
+
 - Detects changes using `detect_path_changes` action
 - Deploys CDK stacks (excludes FilesBucketStack)
 - Runs only when configuration files are modified
 
 #### 2. Embedding Deployment
+
 **Workflow:** `.github/workflows/deploy_embedding.yml`
 
 **Triggers:**
+
 - Push to `main` affecting `embedding/**`
 - Manual workflow dispatch
 
 **Actions:**
+
 - Detects changes using `detect_path_changes` action
 - Deploys CDK stacks
 - Runs only when embedding files are modified
 
 #### 3. Client Dashboard Deployment
+
 **Workflow:** `.github/workflows/deploy_to_s3.yml`
 
 **Triggers:**
+
 - Push to `main` affecting `client/assist-craft-dashboard/**`
 
 **Actions:**
+
 - Detects changes using `detect_path_changes` action
 - Builds production bundle
 - Deploys to S3
 - Triggers Amplify deployment
 
 #### 4. Amplify Deployment
+
 **Workflow:** `.github/workflows/deploy_to_amplify.yml`
 
 **Triggers:**
+
 - Successful completion of `deploy_to_s3` workflow
 
 **Actions:**
+
 - Triggers AWS Amplify deployment from S3 bucket
 
 ### Reusable Actions
 
 #### configure_pnpm
+
 **Location:** `.github/actions/configure_pnpm/`
 
 **Purpose:** Centralized Node.js and pnpm setup for all workflows.
 
 **Usage:**
+
 ```yaml
 - uses: ./.github/actions/configure_pnpm
 ```
 
 #### detect_path_changes
+
 **Location:** `.github/actions/detect_path_changes/`
 
 **Purpose:** Detects which files have changed to conditionally run workflows.
 
 **Usage:**
+
 ```yaml
 - uses: ./.github/actions/detect_path_changes
   with:
@@ -481,15 +526,18 @@ The project uses GitHub Actions for automated deployment:
 ## 🧪 Testing Strategy
 
 ### Unit Tests
+
 - Located in `__test__/` folders next to components
 - Tests business logic in isolation
 - Uses Jest for all services
 
 ### Integration Tests
+
 - Tests API endpoints and service interactions
 - Located in `test/` directories
 
 ### End-to-End Tests
+
 - Tests complete user flows
 - Client dashboard: User interactions and API calls
 - Chat service: WhatsApp message flow
@@ -497,18 +545,21 @@ The project uses GitHub Actions for automated deployment:
 ## 🔐 Security
 
 ### Authentication & Authorization
+
 - **Clerk JWT tokens** for all authenticated requests
 - **Multi-tenant isolation** via PostgreSQL schemas
 - **API Gateway authorizers** for Lambda functions
 - **IAM roles** with least-privilege permissions
 
 ### Data Security
+
 - **Encryption at rest** for S3 and databases
 - **Encryption in transit** via HTTPS/TLS
 - **Presigned URLs** with expiration for file access
 - **Environment variables** for sensitive credentials
 
 ### Network Security
+
 - **VPC isolation** for Lambda functions accessing databases
 - **Security groups** restricting inbound/outbound traffic
 - **CORS policies** limiting frontend origins
@@ -516,17 +567,20 @@ The project uses GitHub Actions for automated deployment:
 ## 📈 Monitoring & Observability
 
 ### CloudWatch Logs
+
 - Lambda function execution logs
 - API Gateway access logs
 - NestJS application logs
 
 ### Metrics
+
 - Lambda duration and errors
 - API Gateway 4xx/5xx responses
 - Database connection pool usage
 - SQS message delivery rates
 
 ### Alarms (Recommended)
+
 - Lambda errors > threshold
 - API Gateway 5xx > 5%
 - Database connection failures
@@ -537,36 +591,44 @@ The project uses GitHub Actions for automated deployment:
 ### Common Issues
 
 #### 1. Service Dependencies Not Installed
+
 **Problem:** `Cannot find module` errors
 
 **Solution:** Ensure you've run `pnpm install` in each service directory.
 
 #### 2. Environment Variables Missing
+
 **Problem:** Service fails to start or deploy
 
 **Solution:** Check that all required `.env` files are configured per service documentation.
 
 #### 3. AWS Credentials Not Configured
+
 **Problem:** CDK deployment fails
 
 **Solution:**
+
 ```bash
 aws configure
 # Enter your AWS Access Key ID, Secret Access Key, and region
 ```
 
 #### 4. Database Connection Issues
+
 **Problem:** Services can't connect to PostgreSQL or MongoDB
 
 **Solution:**
+
 - Verify database credentials in `.env` files
 - Check network connectivity
 - Ensure databases are running
 
 #### 5. GitHub Actions Workflow Not Triggered
+
 **Problem:** Push to `main` doesn't trigger deployment
 
 **Solution:**
+
 - Verify changes are in monitored paths (e.g., `configuration/**`)
 - Check workflow file syntax in `.github/workflows/`
 - Review GitHub Actions logs for errors
@@ -574,6 +636,7 @@ aws configure
 ## 📚 Additional Resources
 
 ### Service Documentation
+
 - [Configuration Service](configuration/README.md)
 - [Embedding Service](embedding/README.md)
 - [Chat Service](chat/README.md)
@@ -582,6 +645,7 @@ aws configure
 - [MongoDB Migrations](database/mongo/README.md)
 
 ### External Documentation
+
 - [AWS CDK Documentation](https://docs.aws.amazon.com/cdk/)
 - [NestJS Documentation](https://docs.nestjs.com/)
 - [React Documentation](https://react.dev/)
@@ -595,6 +659,7 @@ aws configure
 ### Development Workflow
 
 1. **Create a feature branch** from `main`
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -606,15 +671,18 @@ aws configure
    - Update relevant README files
 
 3. **Format your code**
+
    ```bash
    pnpm format
    ```
 
 4. **Commit your changes**
+
    ```bash
    git add .
    git commit -m "feat(service): description of changes"
    ```
+
    Follow [Conventional Commits](https://www.conventionalcommits.org/) format.
 
 5. **Push and create a pull request**
@@ -640,9 +708,10 @@ ISC License - See LICENSE file for details
 ## 🎯 Project Status
 
 **Current Version:** 1.0.0  
-**Status:** Active Development  
+**Status:** Active Development
 
 ### Completed Features
+
 - ✅ Multi-tenant configuration management
 - ✅ Product catalog with categories
 - ✅ Document management
@@ -655,11 +724,13 @@ ISC License - See LICENSE file for details
 - ✅ Multi-database support (PostgreSQL + MongoDB)
 
 ### In Progress
+
 - 🔄 Advanced analytics and reporting
 - 🔄 Multi-language support for AI responses
 - 🔄 Enhanced conversation handoff workflows
 
 ### Planned Features
+
 - 📋 Voice message support
 - 📋 Image recognition for product queries
 - 📋 Automated testing framework
@@ -669,4 +740,3 @@ ISC License - See LICENSE file for details
 ---
 
 **For questions, support, or contributions, please contact the development team or open an issue in the repository.**
-
