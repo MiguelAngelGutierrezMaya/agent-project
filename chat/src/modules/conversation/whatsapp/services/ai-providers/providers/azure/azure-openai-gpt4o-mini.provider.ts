@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AzureChatOpenAI } from '@langchain/openai';
+import { ChatOpenAI } from '@langchain/openai';
 import {
   SystemMessage,
   HumanMessage,
@@ -30,8 +30,12 @@ import { TOOL_NAMES } from '@src/modules/conversation/whatsapp/services/ai-provi
  * Azure OpenAI GPT-4o Mini Provider
  *
  * @description
- * AI provider using Azure OpenAI Service with GPT-4o Mini model.
- * Handles chat completions using LangChain with Azure OpenAI.
+ * AI provider using Azure OpenAI Service (via Foundry) with GPT-4o Mini model.
+ * Handles chat completions using LangChain with OpenAI client configured for Azure endpoint.
+ *
+ * This provider uses the standard OpenAI client with a custom baseURL to connect
+ * to Azure OpenAI Service through Microsoft's Foundry platform, which supports
+ * multiple AI providers beyond just OpenAI.
  *
  * GPT-4o Mini is a cost-effective model that offers:
  * - Fast response times
@@ -41,17 +45,14 @@ import { TOOL_NAMES } from '@src/modules/conversation/whatsapp/services/ai-provi
  *
  * Configuration required:
  * - AZURE_OPENAI_API_KEY
- * - AZURE_OPENAI_ENDPOINT
- * - AZURE_OPENAI_DEPLOYMENT_NAME (GPT-4o Mini deployment)
- * - AZURE_OPENAI_API_VERSION
+ * - AZURE_OPENAI_ENDPOINT (full endpoint URL, e.g., https://instance.openai.azure.com/openai/v1/)
+ * - AZURE_OPENAI_DEPLOYMENT_NAME (GPT-4o Mini deployment name used as model name)
  */
 @Injectable()
 export class AzureOpenAIGpt4oMiniProvider extends BaseAIModelProvider {
   private readonly apiKey: string;
   private readonly endpoint: string;
   private readonly deploymentName: string;
-  private readonly apiVersion: string;
-  private readonly modelName: string = 'gpt-4o-mini';
 
   /** Current request context for tool execution */
   private currentRequest: AIGenerationRequest | null = null;
@@ -69,9 +70,6 @@ export class AzureOpenAIGpt4oMiniProvider extends BaseAIModelProvider {
       this.configService.get<string>('azure.openai.endpoint') ?? '';
     this.deploymentName =
       this.configService.get<string>('azure.openai.deploymentName') ?? '';
-    this.apiVersion =
-      this.configService.get<string>('azure.openai.apiVersion') ??
-      '2024-02-15-preview';
   }
 
   getProviderName(): string {
@@ -108,7 +106,7 @@ export class AzureOpenAIGpt4oMiniProvider extends BaseAIModelProvider {
       const messages = this.buildMessages(request);
 
       this.logger.debug(
-        `Invoking Azure OpenAI with ${messages.length} messages (${request.conversationHistory.length} history + system + user)${request.existingSummary ? ' with existing summary' : ''}`
+        `Invoking Azure OpenAI (via Foundry) with ${messages.length} messages (${request.conversationHistory.length} history + system + user)${request.existingSummary ? ' with existing summary' : ''}`
       );
 
       /* Step 5: Initialize LLM with tools for response generation */
@@ -173,7 +171,7 @@ export class AzureOpenAIGpt4oMiniProvider extends BaseAIModelProvider {
       const generationTime = Date.now() - startTime;
 
       this.logger.error(
-        `Azure OpenAI error: ${error instanceof Error ? error.message : String(error)}`,
+        `Azure OpenAI (via Foundry) error: ${error instanceof Error ? error.message : String(error)}`,
         error instanceof Error ? error.stack : undefined
       );
 
@@ -196,42 +194,55 @@ export class AzureOpenAIGpt4oMiniProvider extends BaseAIModelProvider {
   }
 
   /**
-   * Create base Azure OpenAI LLM instance without tools
+   * Create base OpenAI LLM instance without tools (configured for Azure endpoint)
    *
    * @param request AI generation request
-   * @returns Configured AzureChatOpenAI instance
+   * @returns Configured ChatOpenAI instance
    * @private
    *
    * @description
-   * Creates a clean LangChain AzureChatOpenAI instance without tools.
+   * Creates a clean LangChain ChatOpenAI instance without tools, configured to use
+   * Azure OpenAI Service via the Foundry platform by creating a custom OpenAI client
+   * with the correct authentication headers.
    * This is used for:
    * - ConversationSummaryMemory (needs clean LLM interface)
    * - Base configuration before binding tools
    *
    * Uses request parameters for temperature and maxTokens, with sensible defaults.
+   * The deployment name is used as the model name, and the endpoint is used as baseURL.
+   * Azure Foundry requires the api-key header instead of Authorization Bearer, so we
+   * create a custom OpenAI client with defaultHeaders configured correctly.
    */
-  private createBaseLLM(request: AIGenerationRequest): AzureChatOpenAI {
-    return new AzureChatOpenAI({
-      azureOpenAIApiKey: this.apiKey,
-      azureOpenAIApiInstanceName: this.extractInstanceName(this.endpoint),
-      azureOpenAIApiDeploymentName: this.deploymentName,
-      azureOpenAIApiVersion: this.apiVersion,
-      modelName: this.modelName,
+  private createBaseLLM(request: AIGenerationRequest): ChatOpenAI {
+    /*
+     * Azure Foundry configuration using standard OpenAI client with custom baseURL.
+     * The OpenAI SDK automatically handles Azure authentication when baseURL points to Azure endpoint.
+     */
+    this.logger.debug(
+      `Creating ChatOpenAI with endpoint: ${this.endpoint}, model: ${this.deploymentName}`
+    );
+
+    return new ChatOpenAI({
+      apiKey: this.apiKey,
+      model: this.deploymentName,
       temperature: request.temperature,
       maxTokens: request.maxTokens,
+      configuration: {
+        baseURL: this.endpoint,
+      },
     });
   }
 
   /**
    * Create LLM with tools bound for response generation
    *
-   * @param baseLlm Base Azure OpenAI LLM instance
+   * @param baseLlm Base OpenAI LLM instance (configured for Azure endpoint)
    * @returns Runnable with tools bound
    * @private
    *
    * @description
    * Binds tools to the base LLM for response generation.
-   * Returns a Runnable (not AzureChatOpenAI) which is correct for tool usage.
+   * Returns a Runnable (not ChatOpenAI) which is correct for tool usage.
    *
    * Tools Integration:
    * - Products/Services Search: Allows AI to search company offerings
@@ -240,7 +251,7 @@ export class AzureOpenAIGpt4oMiniProvider extends BaseAIModelProvider {
    * The AI will automatically decide when to call tools based on user intent.
    * Uses .bindTools() which is the recommended LangChain v0.2+ approach.
    */
-  private createLLMWithTools(baseLlm: AzureChatOpenAI) {
+  private createLLMWithTools(baseLlm: ChatOpenAI) {
     /* Initialize tools */
     const featuredProductsTool = createFeaturedProductsTool();
     const productDetailsTool = createProductDetailsTool();
@@ -711,32 +722,6 @@ export class AzureOpenAIGpt4oMiniProvider extends BaseAIModelProvider {
         `Error extracting tool calls: ${error instanceof Error ? error.message : String(error)}`
       );
       return [];
-    }
-  }
-
-  /**
-   * Extract instance name from endpoint URL
-   *
-   * @param endpoint Azure OpenAI endpoint URL
-   * @returns Instance name
-   * @private
-   *
-   * @description
-   * Extracts the instance name from the Azure OpenAI endpoint URL.
-   * Example: https://my-instance.openai.azure.com/ -> my-instance
-   */
-  private extractInstanceName(endpoint: string): string {
-    try {
-      const url = new URL(endpoint);
-      const hostname = url.hostname;
-      /* Extract instance name from hostname (e.g., my-instance.openai.azure.com) */
-      const instanceName = hostname.split('.')[0];
-      return instanceName;
-    } catch {
-      this.logger.warn(
-        `Failed to extract instance name from endpoint: ${endpoint}, using as-is`
-      );
-      return endpoint;
     }
   }
 
