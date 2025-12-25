@@ -4,6 +4,7 @@ import configuration from './config/configuration';
 import { DatabaseModule } from './shared/persistence/mongo/database.module';
 import { ConversationModule } from './modules/conversation/conversation.module';
 import { ConfigNotificationModule } from './modules/config/config-notification.module';
+import { HealthModule } from './modules/health/health.module';
 
 /**
  * Root application module.
@@ -13,6 +14,7 @@ import { ConfigNotificationModule } from './modules/config/config-notification.m
  * - Database module for MongoDB connections (primary, secondary, and dynamic)
  * - Conversation module for chat functionality
  * - Configuration notification module for SQS consumer
+ * - Health check module for monitoring and load balancer health checks
  *
  * @module AppModule
  */
@@ -27,6 +29,7 @@ import { ConfigNotificationModule } from './modules/config/config-notification.m
     DatabaseModule, // MongoDB connections (primary, secondary, dynamic)
     ConversationModule,
     ConfigNotificationModule,
+    HealthModule, // Health check endpoints for monitoring
   ],
   controllers: [],
   providers: [],
