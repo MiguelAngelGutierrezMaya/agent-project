@@ -1,0 +1,112 @@
+###############################################################################
+# Elastic Beanstalk Ignore File
+#
+# Files and directories to exclude from the deployment package.
+# Similar to .gitignore, but specifically for EB deployments.
+#
+# This helps reduce the deployment package size and prevents exposing
+# unnecessary files to the production environment.
+#
+# IMPORTANT: We need src/, tsconfig*.json, and nest-cli.json for compilation!
+###############################################################################
+
+# Dependencies - node_modules/ is INCLUDED (to avoid installation issues)
+# node_modules/ - INCLUDED (we include it to avoid npm install problems)
+
+# Source files - INCLUDE src/ for TypeScript compilation on EB
+# We'll compile on EB, so we need source files
+# test/ - Exclude tests only
+test/
+
+# Development files
+.env
+.env.*
+.envrc
+*.log
+*.log.*
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git files
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+!README.md
+
+# Build artifacts - dist/ is INCLUDED (pre-compiled code)
+coverage/
+.nyc_output/
+*.tsbuildinfo
+*.lcov
+# dist/ - INCLUDED (compiled code is deployed, no need to rebuild on EB)
+
+# Configuration files - INCLUDE tsconfig.json and nest-cli.json for build
+# We need these for TypeScript compilation, so we DON'T exclude them
+.prettierrc
+.eslintrc*
+eslint.config.*
+jest.config.*
+
+# Cache directories
+.npm/
+.eslintcache
+.cache/
+.parcel-cache/
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+.node_repl_history
+
+# Output files
+*.tgz
+.yarn-integrity
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Lock files - INCLUDE package-lock.json for npm ci
+# pnpm-lock.yaml - EXCLUDED (we're using npm now)
+# package-lock.json - INCLUDED (needed for npm ci, so we DON'T exclude it)
+yarn.lock
+pnpm-lock.yaml
+
+###############################################################################
+# Notes:
+# - dist/ folder is INCLUDED (contains compiled JavaScript)
+# - src/ folder is INCLUDED (needed for TypeScript compilation on EB)
+# - tsconfig*.json is INCLUDED (needed for TypeScript compilation)
+# - nest-cli.json is INCLUDED (needed for NestJS build)
+# - package.json is INCLUDED (needed for npm install)
+# - package-lock.json is INCLUDED (needed for npm ci)
+# - node_modules/ is INCLUDED (to avoid npm install issues on EB)
+# - .ebextensions/ is INCLUDED (contains EB configuration)
+# - .platform/ is INCLUDED (contains platform hooks and nginx config)
+# - README.md is included for reference (optional)
+###############################################################################
