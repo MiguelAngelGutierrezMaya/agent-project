@@ -164,6 +164,7 @@ jobs:
 
       - name: Deploy to Elastic Beanstalk
         working-directory: chat
+        timeout-minutes: 10
         env:
           AWS_REGION: ${{ env.AWS_REGION }}
         run: |
@@ -178,7 +179,9 @@ jobs:
           # - Uploads to S3
           # - Creates application version
           # - Updates environment
-          eb deploy ${{ env.EB_ENVIRONMENT_NAME }} --timeout 20
+          # Removed --timeout flag to let eb deploy wait naturally until completion
+          # timeout-minutes on the step provides a hard limit as backup
+          eb deploy ${{ env.EB_ENVIRONMENT_NAME }}
           
           echo "✓ Deployment complete"
 
