@@ -1,0 +1,178 @@
+name: Deploy Chat Service
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'chat/**'
+      - '.github/workflows/deploy_chat.yml'
+
+jobs:
+  detect-changes:
+    name: Detect chat changes
+    runs-on: ubuntu-latest
+    outputs:
+      changes: ${{ steps.detect.outputs.changes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect path changes
+        id: detect
+        uses: ./.github/actions/detect_path_changes
+        with:
+          filters: |
+            chat:
+              - 'chat/**'
+              - '.github/workflows/deploy_chat.yml'
+
+  deploy:
+    name: Deploy chat service to Elastic Beanstalk
+    needs: detect-changes
+    if: github.event_name == 'workflow_dispatch' || contains(fromJSON(needs.detect-changes.outputs.changes), 'chat')
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+      AWS_ROLE_SESSION_NAME: ${{ secrets.AWS_ROLE_SESSION_NAME }}
+      EB_ENVIRONMENT_NAME: ${{ secrets.CHAT_EB_ENVIRONMENT_NAME }}
+      # Application Configuration
+      CHAT_PORT: ${{ secrets.CHAT_PORT }}
+      CHAT_NODE_ENV: ${{ secrets.CHAT_NODE_ENV }}
+      CHAT_BUCKET_NAME: ${{ secrets.CHAT_BUCKET_NAME }}
+      CHAT_FILE_PRESIGNED_EXPIRES_IN: ${{ secrets.CHAT_FILE_PRESIGNED_EXPIRES_IN }}
+      CHAT_CONFIG_NOTIFICATIONS_QUEUE_URL: ${{ secrets.CHAT_CONFIG_NOTIFICATIONS_QUEUE_URL }}
+      # MongoDB Configuration
+      CHAT_MONGODB_URI: ${{ secrets.CHAT_MONGODB_URI }}
+      CHAT_MONGODB_PUBLIC_DATABASE: ${{ secrets.CHAT_MONGODB_PUBLIC_DATABASE }}
+      CHAT_MONGODB_MAX_POOL_SIZE: ${{ secrets.CHAT_MONGODB_MAX_POOL_SIZE }}
+      CHAT_MONGODB_MIN_POOL_SIZE: ${{ secrets.CHAT_MONGODB_MIN_POOL_SIZE }}
+      CHAT_MONGODB_SERVER_SELECTION_TIMEOUT: ${{ secrets.CHAT_MONGODB_SERVER_SELECTION_TIMEOUT }}
+      CHAT_MONGODB_SOCKET_TIMEOUT: ${{ secrets.CHAT_MONGODB_SOCKET_TIMEOUT }}
+      # WhatsApp Configuration
+      CHAT_WHATSAPP_TOKEN: ${{ secrets.CHAT_WHATSAPP_TOKEN }}
+      # Azure OpenAI Configuration
+      CHAT_AZURE_OPENAI_API_KEY: ${{ secrets.CHAT_AZURE_OPENAI_API_KEY }}
+      CHAT_AZURE_OPENAI_ENDPOINT: ${{ secrets.CHAT_AZURE_OPENAI_ENDPOINT }}
+      CHAT_AZURE_OPENAI_DEPLOYMENT_NAME: ${{ secrets.CHAT_AZURE_OPENAI_DEPLOYMENT_NAME }}
+      CHAT_AZURE_OPENAI_API_VERSION: ${{ secrets.CHAT_AZURE_OPENAI_API_VERSION }}
+      # OpenAI Configuration
+      CHAT_OPENAI_API_KEY: ${{ secrets.CHAT_OPENAI_API_KEY }}
+      # PostgreSQL Configuration
+      CHAT_DATABASE_HOST: ${{ secrets.CHAT_DATABASE_HOST }}
+      CHAT_DATABASE_PORT: ${{ secrets.CHAT_DATABASE_PORT }}
+      CHAT_DATABASE_NAME: ${{ secrets.CHAT_DATABASE_NAME }}
+      CHAT_DATABASE_USER: ${{ secrets.CHAT_DATABASE_USER }}
+      CHAT_DATABASE_PASSWORD: ${{ secrets.CHAT_DATABASE_PASSWORD }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure Node and npm
+        uses: ./.github/actions/configure_npm
+        with:
+          working-directory: chat
+
+      - name: Build project
+        working-directory: chat
+        run: |
+          echo "Building project..."
+          npm run build
+          echo "✓ Build complete"
+
+      - name: Install EB CLI
+        run: |
+          echo "Installing Elastic Beanstalk CLI..."
+          pip install --upgrade pip
+          pip install awsebcli
+          eb --version
+          echo "✓ EB CLI installed"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5.1.0
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+          role-session-name: ${{ env.AWS_ROLE_SESSION_NAME }}
+
+      - name: Configure EB CLI
+        working-directory: chat
+        run: |
+          echo "Configuring EB CLI..."
+          
+          # Create minimal .elasticbeanstalk directory and config
+          # This is needed for EB CLI to know the application and region
+          mkdir -p .elasticbeanstalk
+          cat > .elasticbeanstalk/config.yml << EOF
+          branch-defaults:
+            default:
+              environment: ${{ env.EB_ENVIRONMENT_NAME }}
+          global:
+            application_name: chat-service
+            default_region: ${{ env.AWS_REGION }}
+            sc: git
+          EOF
+          
+          echo "✓ EB CLI configured"
+
+      - name: Set Elastic Beanstalk environment variables
+        working-directory: chat
+        run: |
+          echo "Setting Elastic Beanstalk environment variables..."
+          
+          eb setenv \
+            PORT="${{ env.CHAT_PORT }}" \
+            NODE_ENV="${{ env.CHAT_NODE_ENV }}" \
+            AWS_REGION="${{ env.AWS_REGION }}" \
+            BUCKET_NAME="${{ env.CHAT_BUCKET_NAME }}" \
+            FILE_PRESIGNED_EXPIRES_IN="${{ env.CHAT_FILE_PRESIGNED_EXPIRES_IN }}" \
+            CONFIG_NOTIFICATIONS_QUEUE_URL="${{ env.CHAT_CONFIG_NOTIFICATIONS_QUEUE_URL }}" \
+            MONGODB_URI="${{ env.CHAT_MONGODB_URI }}" \
+            MONGODB_PUBLIC_DATABASE="${{ env.CHAT_MONGODB_PUBLIC_DATABASE }}" \
+            MONGODB_MAX_POOL_SIZE="${{ env.CHAT_MONGODB_MAX_POOL_SIZE }}" \
+            MONGODB_MIN_POOL_SIZE="${{ env.CHAT_MONGODB_MIN_POOL_SIZE }}" \
+            MONGODB_SERVER_SELECTION_TIMEOUT="${{ env.CHAT_MONGODB_SERVER_SELECTION_TIMEOUT }}" \
+            MONGODB_SOCKET_TIMEOUT="${{ env.CHAT_MONGODB_SOCKET_TIMEOUT }}" \
+            WHATSAPP_TOKEN="${{ env.CHAT_WHATSAPP_TOKEN }}" \
+            AZURE_OPENAI_API_KEY="${{ env.CHAT_AZURE_OPENAI_API_KEY }}" \
+            AZURE_OPENAI_ENDPOINT="${{ env.CHAT_AZURE_OPENAI_ENDPOINT }}" \
+            AZURE_OPENAI_DEPLOYMENT_NAME="${{ env.CHAT_AZURE_OPENAI_DEPLOYMENT_NAME }}" \
+            AZURE_OPENAI_API_VERSION="${{ env.CHAT_AZURE_OPENAI_API_VERSION }}" \
+            OPENAI_API_KEY="${{ env.CHAT_OPENAI_API_KEY }}" \
+            DATABASE_HOST="${{ env.CHAT_DATABASE_HOST }}" \
+            DATABASE_PORT="${{ env.CHAT_DATABASE_PORT }}" \
+            DATABASE_NAME="${{ env.CHAT_DATABASE_NAME }}" \
+            DATABASE_USER="${{ env.CHAT_DATABASE_USER }}" \
+            DATABASE_PASSWORD="${{ env.CHAT_DATABASE_PASSWORD }}" \
+            --environment ${{ env.EB_ENVIRONMENT_NAME }}
+          
+          echo "✓ Environment variables set"
+
+      - name: Deploy to Elastic Beanstalk
+        working-directory: chat
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+        run: |
+          echo "Deploying to Elastic Beanstalk environment: ${{ env.EB_ENVIRONMENT_NAME }}"
+          echo "EB CLI will automatically respect .ebignore file"
+          echo "Region: ${{ env.AWS_REGION }}"
+          
+          # Deploy using EB CLI
+          # EB CLI automatically:
+          # - Respects .ebignore file
+          # - Creates ZIP package
+          # - Uploads to S3
+          # - Creates application version
+          # - Updates environment
+          eb deploy ${{ env.EB_ENVIRONMENT_NAME }} --timeout 20
+          
+          echo "✓ Deployment complete"
+
