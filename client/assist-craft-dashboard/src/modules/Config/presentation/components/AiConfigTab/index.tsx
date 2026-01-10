@@ -52,6 +52,9 @@ export const AiConfigTab = ({
                 <SelectItem value='azure-openai-gpt-4o-mini'>
                   {t('configuration.ai.models.chatModels.azureGpt4oMini')}
                 </SelectItem>
+                <SelectItem value='azure-openai-gpt-4.1-mini'>
+                  {t('configuration.ai.models.chatModels.azureGpt41Mini')}
+                </SelectItem>
               </SelectContent>
             </Select>
             {errors.chatModel && (

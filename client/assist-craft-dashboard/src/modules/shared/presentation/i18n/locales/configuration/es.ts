@@ -103,6 +103,7 @@ export const configuration = {
     models: {
       chatModels: {
         azureGpt4oMini: 'Azure OpenAI GPT-4o Mini',
+        azureGpt41Mini: 'Azure OpenAI GPT-4.1 Mini',
         azureGpt4: 'Azure OpenAI GPT-4',
         gpt4: 'OpenAI GPT-4',
         gpt35Turbo: 'OpenAI GPT-3.5 Turbo',

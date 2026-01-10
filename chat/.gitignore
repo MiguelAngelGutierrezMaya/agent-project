@@ -59,3 +59,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+# Documentation (internal notes)
+MENSAJE-VISIBILITY-FLOW.md
+RESTART_CHECKLIST.md
