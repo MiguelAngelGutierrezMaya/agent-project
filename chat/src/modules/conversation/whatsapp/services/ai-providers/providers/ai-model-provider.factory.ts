@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type { AIModelProvider } from '@src/modules/conversation/whatsapp/domain/models/AiModelProvider';
 import { AzureOpenAIGpt4oMiniProvider } from './azure/azure-openai-gpt4o-mini.provider';
+import { AzureOpenAIGpt41MiniProvider } from './azure/azure-openai-gpt41-mini.provider';
 
 /**
  * Supported AI model types
@@ -22,6 +23,7 @@ import { AzureOpenAIGpt4oMiniProvider } from './azure/azure-openai-gpt4o-mini.pr
 export enum AIModelType {
   /* Azure OpenAI Models */
   AZURE_OPENAI_GPT_4O_MINI = 'azure-openai-gpt-4o-mini',
+  AZURE_OPENAI_GPT_41_MINI = 'azure-openai-gpt-4.1-mini',
 }
 
 /**
@@ -50,7 +52,8 @@ export class AIModelProviderFactory {
   private readonly providers: Map<string, AIModelProvider>;
 
   constructor(
-    private readonly azureOpenAIGpt4oMiniProvider: AzureOpenAIGpt4oMiniProvider
+    private readonly azureOpenAIGpt4oMiniProvider: AzureOpenAIGpt4oMiniProvider,
+    private readonly azureOpenAIGpt41MiniProvider: AzureOpenAIGpt41MiniProvider
   ) {
     /* Set default provider - GPT-4o Mini for cost-effectiveness */
     this.defaultProvider = this.azureOpenAIGpt4oMiniProvider;
@@ -59,6 +62,7 @@ export class AIModelProviderFactory {
     this.providers = new Map<string, AIModelProvider>([
       /* Azure OpenAI Models */
       [AIModelType.AZURE_OPENAI_GPT_4O_MINI, this.azureOpenAIGpt4oMiniProvider],
+      [AIModelType.AZURE_OPENAI_GPT_41_MINI, this.azureOpenAIGpt41MiniProvider],
     ]);
 
     this.logger.log(

@@ -61,8 +61,6 @@ jobs:
       # Azure OpenAI Configuration
       CHAT_AZURE_OPENAI_API_KEY: ${{ secrets.CHAT_AZURE_OPENAI_API_KEY }}
       CHAT_AZURE_OPENAI_ENDPOINT: ${{ secrets.CHAT_AZURE_OPENAI_ENDPOINT }}
-      CHAT_AZURE_OPENAI_DEPLOYMENT_NAME: ${{ secrets.CHAT_AZURE_OPENAI_DEPLOYMENT_NAME }}
-      CHAT_AZURE_OPENAI_API_VERSION: ${{ secrets.CHAT_AZURE_OPENAI_API_VERSION }}
       # OpenAI Configuration
       CHAT_OPENAI_API_KEY: ${{ secrets.CHAT_OPENAI_API_KEY }}
       # PostgreSQL Configuration
@@ -150,8 +148,6 @@ jobs:
             WHATSAPP_TOKEN="${{ env.CHAT_WHATSAPP_TOKEN }}" \
             AZURE_OPENAI_API_KEY="${{ env.CHAT_AZURE_OPENAI_API_KEY }}" \
             AZURE_OPENAI_ENDPOINT="${{ env.CHAT_AZURE_OPENAI_ENDPOINT }}" \
-            AZURE_OPENAI_DEPLOYMENT_NAME="${{ env.CHAT_AZURE_OPENAI_DEPLOYMENT_NAME }}" \
-            AZURE_OPENAI_API_VERSION="${{ env.CHAT_AZURE_OPENAI_API_VERSION }}" \
             OPENAI_API_KEY="${{ env.CHAT_OPENAI_API_KEY }}" \
             DATABASE_HOST="${{ env.CHAT_DATABASE_HOST }}" \
             DATABASE_PORT="${{ env.CHAT_DATABASE_PORT }}" \

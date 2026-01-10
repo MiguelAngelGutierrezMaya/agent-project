@@ -28,28 +28,35 @@ import { TOOL_NAMES } from '@src/modules/conversation/whatsapp/services/ai-provi
 import { AIModelType } from '@src/modules/conversation/whatsapp/services/ai-providers/providers/ai-model-provider.factory';
 
 /**
- * Azure OpenAI GPT-4o Mini Provider
+ * Azure OpenAI GPT-4.1 Mini Provider
  *
  * @description
- * AI provider using Azure OpenAI Service (via Foundry) with GPT-4o Mini model.
+ * AI provider using Azure OpenAI Service (via Foundry) with GPT-4.1 Mini model.
  * Handles chat completions using LangChain with OpenAI client configured for Azure endpoint.
  *
  * This provider uses the standard OpenAI client with a custom baseURL to connect
  * to Azure OpenAI Service through Microsoft's Foundry platform, which supports
  * multiple AI providers beyond just OpenAI.
  *
- * GPT-4o Mini is a cost-effective model that offers:
+ * GPT-4.1 Mini is Microsoft's latest cost-effective model that offers:
+ * - Enhanced performance over GPT-4o Mini
  * - Fast response times
  * - Lower cost per token
- * - Good balance between performance and cost
+ * - Improved balance between performance and cost
  * - Suitable for customer service and general chat applications
  *
  * Configuration required:
  * - AZURE_OPENAI_API_KEY
  * - AZURE_OPENAI_ENDPOINT (full endpoint URL, e.g., https://instance.openai.azure.com/openai/v1/)
+ * - AZURE_OPENAI_GPT41_MINI_DEPLOYMENT_NAME (GPT-4.1 Mini deployment name used as model name)
+ *
+ * @note
+ * This provider uses the same Azure OpenAI configuration keys as GPT-4o Mini.
+ * If you need separate configurations for different models, add new configuration keys
+ * in the configuration service (e.g., azure.openai.gpt41MiniDeploymentName).
  */
 @Injectable()
-export class AzureOpenAIGpt4oMiniProvider extends BaseAIModelProvider {
+export class AzureOpenAIGpt41MiniProvider extends BaseAIModelProvider {
   private readonly apiKey: string;
   private readonly endpoint: string;
   private readonly deploymentName: string;
@@ -63,16 +70,16 @@ export class AzureOpenAIGpt4oMiniProvider extends BaseAIModelProvider {
     private readonly productEmbeddingsSearchService: ProductEmbeddingsSearchService,
     private readonly companyInfoService: CompanyInfoService
   ) {
-    super(AzureOpenAIGpt4oMiniProvider.name);
+    super(AzureOpenAIGpt41MiniProvider.name);
 
     this.apiKey = this.configService.get<string>('azure.openai.apiKey') ?? '';
     this.endpoint =
       this.configService.get<string>('azure.openai.endpoint') ?? '';
-    this.deploymentName = 'gpt-4o-mini';
+    this.deploymentName = 'gpt-4.1-mini';
   }
 
   getProviderName(): string {
-    return AIModelType.AZURE_OPENAI_GPT_4O_MINI;
+    return AIModelType.AZURE_OPENAI_GPT_41_MINI;
   }
 
   async generateResponse(
@@ -105,7 +112,7 @@ export class AzureOpenAIGpt4oMiniProvider extends BaseAIModelProvider {
       const messages = this.buildMessages(request);
 
       this.logger.debug(
-        `Invoking Azure OpenAI (via Foundry) with ${messages.length} messages (${request.conversationHistory.length} history + system + user)${request.existingSummary ? ' with existing summary' : ''}`
+        `Invoking Azure OpenAI GPT-4.1 Mini (via Foundry) with ${messages.length} messages (${request.conversationHistory.length} history + system + user)${request.existingSummary ? ' with existing summary' : ''}`
       );
 
       /* Step 5: Initialize LLM with tools for response generation */
@@ -170,7 +177,7 @@ export class AzureOpenAIGpt4oMiniProvider extends BaseAIModelProvider {
       const generationTime = Date.now() - startTime;
 
       this.logger.error(
-        `Azure OpenAI (via Foundry) error: ${error instanceof Error ? error.message : String(error)}`,
+        `Azure OpenAI GPT-4.1 Mini (via Foundry) error: ${error instanceof Error ? error.message : String(error)}`,
         error instanceof Error ? error.stack : undefined
       );
 

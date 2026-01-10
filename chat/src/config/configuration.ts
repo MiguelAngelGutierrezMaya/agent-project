@@ -47,8 +47,6 @@ const DEFAULT_API_VERSION = 'v24.0';
  */
 const DEFAULT_AZURE_OPENAI_API_KEY = '';
 const DEFAULT_AZURE_OPENAI_ENDPOINT = '';
-const DEFAULT_AZURE_OPENAI_DEPLOYMENT_NAME = '';
-const DEFAULT_AZURE_OPENAI_API_VERSION = '2024-02-15-preview';
 
 /**
  * Default OpenAI config.
@@ -130,16 +128,6 @@ export default () => ({
       /* Azure OpenAI Endpoint */
       endpoint:
         process.env.AZURE_OPENAI_ENDPOINT ?? DEFAULT_AZURE_OPENAI_ENDPOINT,
-
-      /* Azure OpenAI Deployment Name */
-      deploymentName:
-        process.env.AZURE_OPENAI_DEPLOYMENT_NAME ??
-        DEFAULT_AZURE_OPENAI_DEPLOYMENT_NAME,
-
-      /* Azure OpenAI API Version */
-      apiVersion:
-        process.env.AZURE_OPENAI_API_VERSION ??
-        DEFAULT_AZURE_OPENAI_API_VERSION,
     },
   },
   openai: {

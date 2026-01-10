@@ -4,6 +4,7 @@ import { ProvidersModule } from './providers/providers.module';
 import { ToolsModule } from './tools/tools.module';
 import { AIModelProviderFactory } from './providers/ai-model-provider.factory';
 import { AzureOpenAIGpt4oMiniProvider } from './providers/azure/azure-openai-gpt4o-mini.provider';
+import { AzureOpenAIGpt41MiniProvider } from './providers/azure/azure-openai-gpt41-mini.provider';
 
 /**
  * AI Providers Module
@@ -40,6 +41,7 @@ import { AzureOpenAIGpt4oMiniProvider } from './providers/azure/azure-openai-gpt
 
     /* AI Model Providers (depend on ToolsModule) */
     AzureOpenAIGpt4oMiniProvider,
+    AzureOpenAIGpt41MiniProvider,
   ],
   exports: [
     /* Export ProvidersModule exports (EmbeddingProviderFactory) */
